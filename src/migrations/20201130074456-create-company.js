@@ -11,20 +11,30 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
-      phone: {
+      company: {
         type: Sequelize.STRING
       },
-      email: {
+      jobDesk: {
         type: Sequelize.STRING
+      },
+      phone: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      email: {
+        type: Sequelize.STRING,
+        unique: true
       },
       description: {
         type: Sequelize.STRING
       },
       instagram: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       linkedin: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       userId: {
         type: Sequelize.INTEGER
