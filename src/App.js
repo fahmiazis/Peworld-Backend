@@ -10,6 +10,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 app.use(cors())
 
+const rolesRoutes = require('./routes/roles')
+const authRoutes = require('./routes/auth')
+
+app.use('/role', rolesRoutes)
+app.use('/auth', authRoutes)
+
 app.listen(APP_PORT, () => {
   console.log(`App is running on port ${APP_PORT}`)
 })

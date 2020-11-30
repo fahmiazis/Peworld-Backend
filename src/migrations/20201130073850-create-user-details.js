@@ -12,7 +12,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       phone: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
       jobTitle: {
         type: Sequelize.STRING
