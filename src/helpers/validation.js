@@ -19,5 +19,9 @@ module.exports = {
     phone: joi.string().required(),
     password: joi.string().required().min(8),
     confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
+  }),
+  login: joi.object({
+    email: joi.string().required(),
+    password: joi.string().required()
   })
 }
