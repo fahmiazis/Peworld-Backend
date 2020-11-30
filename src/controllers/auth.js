@@ -26,7 +26,7 @@ module.exports = {
 
             const createDetails = await UserDetails.create(details)
             if (createDetails) {
-              return response(res, 'User created!', { data: { id: createUser.id, value } }, 201)
+              return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)
             } else {
               return response(res, 'Failed to create user', {}, 400, false)
             }
