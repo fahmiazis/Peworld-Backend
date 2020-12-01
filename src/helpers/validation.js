@@ -23,5 +23,8 @@ module.exports = {
   login: joi.object({
     email: joi.string().required(),
     password: joi.string().required()
+  }),
+  message: joi.object({
+    content: joi.string().required()
   })
 }
