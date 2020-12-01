@@ -15,6 +15,9 @@ route.get('/portofolio/:id', portofolio.getDetailPortofolio)
 route.patch('/portofolio/:id', portofolio.updatePortofolio)
 route.delete('/portofolio/:id', portofolio.deletePortofolio)
 
+route.get('/company/all', jobSeekers.listCompany)
+route.get('/company/:id', jobSeekers.detailCompany)
+
 route.get('/profile/get', jobSeekers.profile)
 route.patch('/profile/detail/update/', jobSeekers.updateProfileDetail) // update detail users
 route.patch('/profile/update', jobSeekers.updateUser) // update user (email, password)

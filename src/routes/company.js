@@ -6,5 +6,6 @@ route.get('/job-seeker/all', company.listJobSeekers)
 route.get('/job-seeker/:id', company.detailJobSeeker)
 route.patch('/profile/update', company.updateCompany) // update company detail
 route.patch('/update/user', company.updateUser) // update user like email and password
+route.patch('/profile/avatar/update', company.updateAvatar) // update job seeker avatar
 
 module.exports = route

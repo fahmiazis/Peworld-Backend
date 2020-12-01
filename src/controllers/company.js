@@ -67,7 +67,7 @@ module.exports = {
       }
     } catch (e) {}
   },
-  // mean company who register as users in table Users
+  // updateUser mean company who register as users in table Users
   updateUser: async (req, res) => {
     try {
       const { id } = req.user
