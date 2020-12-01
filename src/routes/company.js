@@ -1,7 +1,10 @@
 const route = require('express').Router()
-const jobSeek = require('../controllers/jobSeekers')
+const company = require('../controllers/company')
 
-route.get('/job-seeker/all', jobSeek.getUsers)
-route.get('/job-seeker/:id', jobSeek.getDetailUser)
+route.get('/profile/get', company.profile)
+route.get('/job-seeker/all', company.listJobSeekers)
+route.get('/job-seeker/:id', company.detailJobSeeker)
+route.patch('/profile/update', company.updateCompany) // update company detail
+route.patch('/update/user', company.updateUser) // update user like email and password
 
 module.exports = route

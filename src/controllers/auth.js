@@ -50,7 +50,6 @@ module.exports = {
           const createUser = await Users.create(users)
           if (createUser) {
             const details = { name, company, jobDesk, phone, userId: createUser.id }
-
             const createDetails = await Company.create(details)
             if (createDetails) {
               return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)

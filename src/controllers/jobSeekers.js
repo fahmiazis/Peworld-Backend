@@ -3,7 +3,7 @@ const { Op } = require('sequelize')
 const qs = require('querystring')
 const { APP_URL, APP_PORT } = process.env
 const response = require('../helpers/response')
-const { updateDetailSeeker, updateSeeker } = require('../helpers/validation')
+const { updateDetailSeeker, updateUser } = require('../helpers/validation')
 const { SEEKER_KEY, TOKEN_EXP } = process.env
 const bcrypt = require('bcrypt')
 const multer = require('multer')
@@ -29,7 +29,7 @@ module.exports = {
   updateUser: async (req, res) => {
     try {
       const { id } = req.user
-      const { value, error } = updateSeeker.validate(req.body)
+      const { value, error } = updateUser.validate(req.body)
       if (error) {
         return response(res, error.message, {}, 400, false)
       }

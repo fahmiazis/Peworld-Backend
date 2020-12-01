@@ -17,9 +17,6 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING
     },
-    company: {
-      type: DataTypes.STRING
-    },
     jobDesk: {
       type: DataTypes.STRING
     },
