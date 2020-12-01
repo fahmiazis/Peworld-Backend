@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING,
     github: DataTypes.STRING,
     workplace: DataTypes.STRING,
-    type: DataTypes.ENUM('web', 'mobile')
+    type: DataTypes.ENUM('web', 'mobile'),
+    userId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Portfolio'

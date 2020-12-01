@@ -26,6 +26,9 @@ module.exports = {
       type: {
         type: Sequelize.ENUM('web', 'mobile')
       },
+      userId: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
