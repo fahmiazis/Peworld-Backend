@@ -1,8 +1,10 @@
 const { Users, Message } = require('../models')
 
+const { Op } = require('sequelize')
+
 const response = require('../helpers/response')
 const { message } = require('../helpers/validation')
-const { Op } = require('sequelize')
+const { pagination } = require('../helpers/pagination')
 
 module.exports = {
   sendMsg: async (req, res) => {
@@ -47,6 +49,32 @@ module.exports = {
       } else {
         return response(res, 'Recipient not found', {}, 404, false)
       }
+    } catch (e) {
+      return response(res, e.message, {}, 500, false)
+    }
+  },
+  listMsg: async (req, res) => {
+    try {
+      const { id } = req.user
+      const { page = 1, limit = 10 } = req.query
+      const count = await Message.count({
+        where: {
+          [Op.or]: [{ sender: id }, { recipient: id }],
+          isLatest: true
+        }
+      })
+
+      const pageInfo = pagination('job-seeker/message/list', req.query, page, limit, count)
+
+      const results = await Message.findAll({
+        where: {
+          [Op.or]: [{ sender: id }, { recipient: id }],
+          isLatest: true
+        },
+        order: [['createdAt', 'DESC']]
+      })
+
+      return response(res, 'List of message', { data: results, pageInfo })
     } catch (e) {
       return response(res, e.message, {}, 500, false)
     }
