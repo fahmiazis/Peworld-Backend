@@ -21,17 +21,29 @@ module.exports = {
           let { name, email, phone, password } = value
           password = await bcrypt.hash(password, await bcrypt.genSalt())
 
-          const users = { email, password, roleId: 1 }
+          const findEmail = await Users.findAll({ where: { email } })
 
-          const createUser = await Users.create(users)
-          if (createUser) {
-            const details = { name, phone, userId: createUser.id }
+          if (findEmail.length) {
+            return response(res, 'Email already used', {}, 400, false)
+          } else {
+            const findPhone = await UserDetails.findAll({ where: { phone } })
 
-            const createDetails = await UserDetails.create(details)
-            if (createDetails) {
-              return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)
+            if (findPhone.length) {
+              return response(res, 'Phone already used', {}, 400, false)
             } else {
-              return response(res, 'Failed to create user', {}, 400, false)
+              const users = { email, password, roleId: 1 }
+
+              const createUser = await Users.create(users)
+              if (createUser) {
+                const details = { name, phone, userId: createUser.id }
+
+                const createDetails = await UserDetails.create(details)
+                if (createDetails) {
+                  return response(res, 'User created!', { data: { id: createUser.id, email, name, phone } }, 201)
+                } else {
+                  return response(res, 'Failed to create user', {}, 400, false)
+                }
+              }
             }
           }
           break
@@ -41,21 +53,32 @@ module.exports = {
           if (error) {
             return response(res, error.message, {}, 400, false)
           }
-          console.log(value)
           let { name, email, company, jobDesk, phone, password } = value
           password = await bcrypt.hash(password, await bcrypt.genSalt())
 
-          const users = { email, password, roleId: 2 }
+          const findEmail = await Users.findAll({ where: { email } })
 
-          const createUser = await Users.create(users)
-          if (createUser) {
-            const details = { name, company, jobDesk, phone, userId: createUser.id }
+          if (findEmail.length) {
+            return response(res, 'Email already used', {}, 400, false)
+          } else {
+            const findPhone = await Company.findAll({ where: { phone } })
 
-            const createDetails = await Company.create(details)
-            if (createDetails) {
-              return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)
+            if (findPhone.length) {
+              return response(res, 'Phone already used', {}, 400, false)
             } else {
-              return response(res, 'Failed to create user', {}, 400, false)
+              const users = { email, password, roleId: 2 }
+
+              const createUser = await Users.create(users)
+              if (createUser) {
+                const details = { name, company, jobDesk, phone, userId: createUser.id }
+
+                const createDetails = await Company.create(details)
+                if (createDetails) {
+                  return response(res, 'User created!', { data: { id: createUser.id, name, email, company, phone } }, 201)
+                } else {
+                  return response(res, 'Failed to create user', {}, 400, false)
+                }
+              }
             }
           }
         }
@@ -125,5 +148,6 @@ module.exports = {
       console.log(e)
       return response(res, e.message, {}, 500, false)
     }
-  }
+  },
+  resetPassword: async (req, res) => {}
 }
