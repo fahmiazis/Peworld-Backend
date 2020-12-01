@@ -21,9 +21,10 @@ module.exports = {
       const { id } = req.user
       const result = await Company.findOne({
         where: { userId: id },
-        // include: {
-        //   model: ImageProfile
-        // }
+        include: {
+          model: ImageProfile,
+          attribute: ['id, avatar']
+        }
       })
       if (result) {
         return response(res, `Company with id ${id}`, { result })
