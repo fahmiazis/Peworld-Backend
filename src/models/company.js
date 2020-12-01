@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       // define association here
       Company.hasOne(models.ImageProfile, {
-        foreignKey: 'userId'
+        foreignKey: 'userId',
+        as: 'companyAvatar'
       })
     }
   };

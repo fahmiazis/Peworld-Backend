@@ -23,7 +23,8 @@ module.exports = {
         where: { userId: id },
         include: {
           model: ImageProfile,
-          attribute: ['id, avatar']
+          attribute: ['id', 'avatar'],
+          as: 'profileAvatar'
         }
       })
       if (result) {

@@ -17,7 +17,8 @@ module.exports = {
       const result = await UserDetails.findOne({
         include: {
           model: ImageProfile,
-          attributes: ['id', 'avatar']
+          attributes: ['id', 'avatar'],
+          as: 'profileAvatar'
         },
         where: { userId: id }
       })
