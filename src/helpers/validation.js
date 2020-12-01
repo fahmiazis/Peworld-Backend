@@ -23,5 +23,18 @@ module.exports = {
   login: joi.object({
     email: joi.string().required(),
     password: joi.string().required()
+  }),
+  updateSeeker: joi.object({
+    email: joi.string(),
+    password: joi.string()
+  }),
+  updateDetailSeeker: joi.object({
+    name: joi.string(),
+    jobTitle: joi.string(),
+    workplace: joi.string(),
+    description: joi.string(),
+    domicile: joi.string(),
+    github: joi.string(),
+    instagram: joi.string()
   })
 }
