@@ -26,5 +26,21 @@ module.exports = {
   }),
   message: joi.object({
     content: joi.string().required()
+  }),
+  portofolio: joi.object({
+    name: joi.string().required(),
+    linkApp: joi.string().required(),
+    description: joi.string().required(),
+    github: joi.string().required(),
+    workplace: joi.string().required(),
+    type: joi.string().required()
+  }),
+  updatePortofolio: joi.object({
+    name: joi.string(),
+    linkApp: joi.string(),
+    description: joi.string(),
+    github: joi.string(),
+    workplace: joi.string(),
+    type: joi.string()
   })
 }
