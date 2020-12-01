@@ -36,7 +36,8 @@ module.exports = {
   }),
   updateUser: joi.object({
     email: joi.string(),
-    password: joi.string()
+    password: joi.string().required().min(8),
+    confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
   }),
   updateDetailSeeker: joi.object({
     name: joi.string(),
