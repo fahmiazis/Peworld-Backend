@@ -18,6 +18,10 @@ module.exports = {
         return response(res, error.message, {}, 400, false)
       }
 
+      if (sender === recipient) {
+        return response(res, 'Sender and recipient has same id', {}, 400, false)
+      }
+
       const findUser = await Users.findByPk(recipient)
 
       if (findUser) {
@@ -100,21 +104,33 @@ module.exports = {
 
       const pageInfo = pagination(`job-seeker/message/${friendId}`, req.query, page, limit, count)
 
-      const results = await Message.findAll({
+      const read = await Message.update({ isRead: true }, {
         where: {
-          sender: {
-            [Op.or]: [userId, friendId]
-          },
-          recipient: {
-            [Op.or]: [userId, friendId]
-          }
-        },
-        order: [['createdAt', 'DESC']],
-        limit: pageInfo.limit,
-        offset: pageInfo.offset
+          sender: friendId,
+          recipient: userId,
+          isRead: false
+        }
       })
 
-      return response(res, 'List of chat', { data: results, pageInfo })
+      if (read) {
+        const results = await Message.findAll({
+          where: {
+            sender: {
+              [Op.or]: [userId, friendId]
+            },
+            recipient: {
+              [Op.or]: [userId, friendId]
+            }
+          },
+          order: [['createdAt', 'DESC']],
+          limit: pageInfo.limit,
+          offset: pageInfo.offset
+        })
+
+        if (results) {
+          return response(res, 'List of chat', { data: results, pageInfo })
+        }
+      }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
     }
