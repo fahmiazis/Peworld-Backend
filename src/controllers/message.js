@@ -71,7 +71,9 @@ module.exports = {
           [Op.or]: [{ sender: id }, { recipient: id }],
           isLatest: true
         },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit: pageInfo.limit,
+        offset: pageInfo.offset
       })
 
       return response(res, 'List of message', { data: results, pageInfo })
