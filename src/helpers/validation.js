@@ -55,5 +55,11 @@ module.exports = {
     domicile: joi.string(),
     github: joi.string(),
     instagram: joi.string()
+  }),
+  experienceSeeker: joi.object({
+    jobDesk: joi.string().required(),
+    company: joi.string().required(),
+    year: joi.number().integer().min(1900).required(),
+    description: joi.string().required()
   })
 }
