@@ -23,5 +23,11 @@ module.exports = {
   login: joi.object({
     email: joi.string().required(),
     password: joi.string().required()
+  }),
+  experienceSeeker: joi.object({
+    jobDesk: joi.string().required(),
+    company: joi.string().required(),
+    year: joi.number().integer().min(1900).required(),
+    description: joi.string().required()
   })
 }

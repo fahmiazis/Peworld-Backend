@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Experience.init({
-    name: DataTypes.STRING,
     jobDesk: DataTypes.STRING,
     userId: DataTypes.INTEGER,
     company: DataTypes.STRING,
