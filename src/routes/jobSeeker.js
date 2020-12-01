@@ -2,7 +2,7 @@ const route = require('express').Router()
 const skill = require('../controllers/skills')
 const portofolio = require('../controllers/portofolio')
 const messageController = require('../controllers/message')
-const jobSeekers = require('../controllers/jobSeekers')
+const jobSeekers = require('../controllers/jobSeeker')
 
 route.get('/profile/get', jobSeekers.profile)
 route.patch('/profile/detail/update/', jobSeekers.updateProfileDetail) // update detail users
