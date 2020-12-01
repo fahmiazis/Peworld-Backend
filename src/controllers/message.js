@@ -78,5 +78,43 @@ module.exports = {
     } catch (e) {
       return response(res, e.message, {}, 500, false)
     }
+  },
+  listChat: async (req, res) => {
+    try {
+      const { id: userId } = req.user
+      const { id: friendId } = req.params
+      const { page = 1, limit = 10 } = req.query
+
+      const count = await Message.count({
+        where: {
+          sender: {
+            [Op.or]: [userId, friendId]
+          },
+          recipient: {
+            [Op.or]: [userId, friendId]
+          }
+        }
+      })
+
+      const pageInfo = pagination(`job-seeker/message/${friendId}`, req.query, page, limit, count)
+
+      const results = await Message.findAll({
+        where: {
+          sender: {
+            [Op.or]: [userId, friendId]
+          },
+          recipient: {
+            [Op.or]: [userId, friendId]
+          }
+        },
+        order: [['createdAt', 'DESC']],
+        limit: pageInfo.limit,
+        offset: pageInfo.offset
+      })
+
+      return response(res, 'List of chat', { data: results, pageInfo })
+    } catch (e) {
+      return response(res, e.message, {}, 500, false)
+    }
   }
 }
