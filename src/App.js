@@ -10,6 +10,9 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 app.use(cors())
 
+// provide static file for storing image
+app.use('/uploads', express.static('assets/uploads'))
+
 const { authSeeker, authCompany } = require('./middleware/auth')
 
 const rolesRoutes = require('./routes/roles')

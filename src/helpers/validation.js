@@ -42,5 +42,18 @@ module.exports = {
     github: joi.string(),
     workplace: joi.string(),
     type: joi.string()
+  }),
+  updateSeeker: joi.object({
+    email: joi.string(),
+    password: joi.string()
+  }),
+  updateDetailSeeker: joi.object({
+    name: joi.string(),
+    jobTitle: joi.string(),
+    workplace: joi.string(),
+    description: joi.string(),
+    domicile: joi.string(),
+    github: joi.string(),
+    instagram: joi.string()
   })
 }

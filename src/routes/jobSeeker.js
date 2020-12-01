@@ -2,6 +2,12 @@ const route = require('express').Router()
 const skill = require('../controllers/skills')
 const portofolio = require('../controllers/portofolio')
 const messageController = require('../controllers/message')
+const jobSeekers = require('../controllers/jobSeekers')
+
+route.get('/profile/get', jobSeekers.profile)
+route.patch('/profile/detail/update/', jobSeekers.updateProfileDetail) // update detail users
+route.patch('/profile/update', jobSeekers.updateUser) // update user (email, password)
+route.patch('/profile/avatar/update', jobSeekers.updateAvatar) // update job seeker avatar
 
 route.post('/skill/post', skill.postSkill)
 route.get('/skill/get', skill.getSkills)
