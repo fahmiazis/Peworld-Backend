@@ -125,5 +125,6 @@ module.exports = {
       console.log(e)
       return response(res, e.message, {}, 500, false)
     }
-  }
+  },
+  resetPassword: async (req, res) => {}
 }
