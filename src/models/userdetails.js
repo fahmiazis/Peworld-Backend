@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
+      UserDetails.hasOne(models.ImageProfile, {
+        foreignKey: 'userId',
+        as: 'profileAvatar'
+      })
     }
   };
   UserDetails.init({

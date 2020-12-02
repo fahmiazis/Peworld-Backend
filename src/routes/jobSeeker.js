@@ -9,6 +9,9 @@ route.patch('/profile/detail/update/', jobSeekers.updateProfileDetail) // update
 route.patch('/profile/update', jobSeekers.updateUser) // update user (email, password)
 route.patch('/profile/avatar/update', jobSeekers.updateAvatar) // update job seeker avatar
 
+route.get('/company/all', jobSeekers.listCompany)
+route.get('/company/:id', jobSeekers.detailCompany)
+
 route.post('/skill/post', skill.postSkill)
 route.get('/skill/get', skill.getSkills)
 route.patch('/skill/update/:id', skill.updateSkill)

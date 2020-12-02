@@ -20,12 +20,36 @@ module.exports = {
     password: joi.string().required().min(8),
     confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
   }),
+  updateCompany: joi.object({
+    name: joi.string(),
+    company: joi.string(),
+    jobDesk: joi.string(),
+    phone: joi.string(),
+    email: joi.string(),
+    description: joi.string(),
+    instagram: joi.string(),
+    linkedin: joi.string()
+  }),
   login: joi.object({
     email: joi.string().required(),
     password: joi.string().required()
   }),
   message: joi.object({
     content: joi.string().required()
+  }),
+  updateUser: joi.object({
+    email: joi.string(),
+    password: joi.string().required().min(8),
+    confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
+  }),
+  updateDetailSeeker: joi.object({
+    name: joi.string(),
+    jobTitle: joi.string(),
+    workplace: joi.string(),
+    description: joi.string(),
+    domicile: joi.string(),
+    github: joi.string(),
+    instagram: joi.string()
   }),
   portofolio: joi.object({
     name: joi.string().required(),
@@ -42,18 +66,5 @@ module.exports = {
     github: joi.string(),
     workplace: joi.string(),
     type: joi.string()
-  }),
-  updateSeeker: joi.object({
-    email: joi.string(),
-    password: joi.string()
-  }),
-  updateDetailSeeker: joi.object({
-    name: joi.string(),
-    jobTitle: joi.string(),
-    workplace: joi.string(),
-    description: joi.string(),
-    domicile: joi.string(),
-    github: joi.string(),
-    instagram: joi.string()
   })
 }
