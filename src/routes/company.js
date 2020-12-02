@@ -1,14 +1,14 @@
 const route = require('express').Router()
 const company = require('../controllers/company')
+const messageController = require('../controllers/message')
 
-route.get('/profile/get', company.profile)
 route.get('/job-seeker/all', company.listJobSeekers)
 route.get('/job-seeker/:id', company.detailJobSeeker)
+
+route.get('/profile/get', company.profile)
 route.patch('/profile/update', company.updateCompany) // update company detail
 route.patch('/update/user', company.updateUser) // update user like email and password
 route.patch('/profile/avatar/update', company.updateAvatar) // update job seeker avatar
-
-const messageController = require('../controllers/message')
 
 route.post('/message/:id', messageController.sendMsg)
 route.get('/message/list', messageController.listMsg)
