@@ -209,7 +209,7 @@ module.exports = {
       } else {
         const result = await UserDetails.findAndCountAll({
           include: [
-            { model: ImageProfile, as: 'avatar' },
+            { model: ImageProfile, as: 'profileAvatar' },
             { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
           ],
           where: {
