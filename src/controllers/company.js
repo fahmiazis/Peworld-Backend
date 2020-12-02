@@ -14,11 +14,14 @@ module.exports = {
       const { id } = req.user
       const result = await Company.findOne({
         where: { userId: id },
-        include: {
+        include: [{
+          model: Users,
+          attributes: ['id', 'email', 'roleId']
+        }, {
           model: ImageProfile,
           attribute: ['id', 'avatar'],
-          as: 'profileAvatar'
-        }
+          as: 'companyAvatar'
+        }]
       })
       if (result) {
         return response(res, `Company with id ${id}`, { result })
@@ -180,7 +183,7 @@ module.exports = {
       if (sortValue === 'domicile') {
         const result = await UserDetails.findAndCountAll({
           include: [
-            { model: ImageProfile, as: 'avatar' },
+            { model: ImageProfile, as: 'profileAvatar' },
             { model: skillUser, as: 'skills', limit: 3, include: [{ model: skillUser, as: 'skill' }] }
           ],
           where: {
@@ -206,7 +209,7 @@ module.exports = {
       } else {
         const result = await UserDetails.findAndCountAll({
           include: [
-            { model: ImageProfile, as: 'avatar' },
+            { model: ImageProfile, as: 'profileAvatar' },
             { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
           ],
           where: {
@@ -238,7 +241,7 @@ module.exports = {
       const { id } = req.params
       const result = await UserDetails.findOne({
         include: [
-          { model: ImageProfile, as: 'avatar' },
+          { model: ImageProfile, as: 'profileAvatar' },
           { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
           { model: Experience, as: 'experience' },
           { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
@@ -246,9 +249,9 @@ module.exports = {
         where: { userId: id }
       })
       if (result) {
-        return response(res, 'detail user', { result })
+        return response(res, 'detail job seeker', { result })
       } else {
-        return response(res, 'fail to get detail user', {}, 400, false)
+        return response(res, 'fail to get detail job seeker', {}, 400, false)
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)

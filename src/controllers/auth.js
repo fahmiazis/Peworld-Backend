@@ -6,7 +6,12 @@ const jwt = require('jsonwebtoken')
 const { SEEKER_KEY, COMPANY_KEY, TOKEN_EXP } = process.env
 
 const response = require('../helpers/response')
-const { registerSeeker, registerCompany, login } = require('../helpers/validation')
+const {
+  registerSeeker,
+  registerCompany,
+  login
+} = require('../helpers/validation')
+const { verifyRefreshToken, signRefreshToken, signAcessToken } = require('../middleware/auth')
 
 module.exports = {
   register: async (req, res) => {
@@ -39,7 +44,12 @@ module.exports = {
 
                 const createDetails = await UserDetails.create(details)
                 if (createDetails) {
-                  return response(res, 'User created!', { data: { id: createUser.id, email, name, phone } }, 201)
+                  return response(
+                    res,
+                    'User created!',
+                    { data: { id: createUser.id, email, name, phone } },
+                    201
+                  )
                 } else {
                   return response(res, 'Failed to create user', {}, 400, false)
                 }
@@ -70,11 +80,24 @@ module.exports = {
 
               const createUser = await Users.create(users)
               if (createUser) {
-                const details = { name, company, jobDesk, phone, userId: createUser.id }
+                const details = {
+                  name,
+                  company,
+                  jobDesk,
+                  phone,
+                  userId: createUser.id
+                }
 
                 const createDetails = await Company.create(details)
                 if (createDetails) {
-                  return response(res, 'User created!', { data: { id: createUser.id, name, email, company, phone } }, 201)
+                  return response(
+                    res,
+                    'User created!',
+                    {
+                      data: { id: createUser.id, name, email, company, phone }
+                    },
+                    201
+                  )
                 } else {
                   return response(res, 'Failed to create user', {}, 400, false)
                 }
@@ -107,13 +130,22 @@ module.exports = {
           switch (role) {
             case 'job-seeker': {
               if (roleId === 1) {
-                jwt.sign({ id: find.id }, SEEKER_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
-                  if (err) {
-                    return response(res, err.message, 500, false)
-                  } else {
-                    return response(res, 'Login as job seeker successfully', { token })
+                const refreshToken = await signRefreshToken(find.id, roleId)
+                jwt.sign(
+                  { id: find.id, roleId: 1 },
+                  SEEKER_KEY,
+                  { expiresIn: TOKEN_EXP },
+                  (err, token) => {
+                    if (err) {
+                      return response(res, err.message, 500, false)
+                    } else {
+                      return response(res, 'Login as job seeker successfully', {
+                        token,
+                        refreshToken
+                      })
+                    }
                   }
-                })
+                )
               } else {
                 return response(res, 'Wrong email or password', {}, 400, false)
               }
@@ -121,13 +153,20 @@ module.exports = {
             }
             case 'company': {
               if (roleId === 2) {
-                jwt.sign({ id: find.id }, COMPANY_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
-                  if (err) {
-                    return response(res, err.message, 500, false)
-                  } else {
-                    return response(res, 'Login as company successfully', { token })
+                jwt.sign(
+                  { id: find.id, roleId: 2 },
+                  COMPANY_KEY,
+                  { expiresIn: TOKEN_EXP },
+                  (err, token) => {
+                    if (err) {
+                      return response(res, err.message, 500, false)
+                    } else {
+                      return response(res, 'Login as company successfully', {
+                        token
+                      })
+                    }
                   }
-                })
+                )
               } else {
                 return response(res, 'Wrong email or password', {}, 400, false)
               }
@@ -149,5 +188,20 @@ module.exports = {
       return response(res, e.message, {}, 500, false)
     }
   },
-  resetPassword: async (req, res) => {}
+  resetPassword: async (req, res) => {},
+  refreshToken: async (req, res) => {
+    try {
+      const { refreshToken } = req.body
+      if (refreshToken === undefined) {
+        return response(res, 'Unauthorize', {}, 401, false)
+      }
+      const data = await verifyRefreshToken(refreshToken)
+      console.log(data)
+      const accessToken = await signAcessToken(data.id, data.role)
+      const refresToken = await signRefreshToken(data.id, data.role)
+      return response(res, 'Succesfully', { accessToken, refresToken })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }
