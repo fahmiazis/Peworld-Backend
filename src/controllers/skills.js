@@ -1,4 +1,4 @@
-const { Skills } = require('../models')
+const { Skills, skillUser } = require('../models')
 const response = require('../helpers/response')
 const { role } = require('../helpers/validation')
 const { Op } = require('sequelize')
@@ -13,15 +13,38 @@ module.exports = {
       if (error) {
         return response(res, error.message, {}, 400, false)
       } else {
-        const data = {
-          ...value,
-          userId: id
-        }
-        const result = await Skills.create(data)
-        if (result) {
-          return response(res, 'Skills created', { data: result })
+        const find = await Skills.findOne({
+          where: {
+            name: value.name
+          }
+        })
+        if (find) {
+          const send = {
+            skillId: find.id,
+            userId: id
+          }
+          const result = await skillUser.create(send)
+          if (result) {
+            return response(res, 'Skills created', { data: result, find })
+          } else {
+            return response(res, 'Failed to create', {}, 400, false)
+          }
         } else {
-          return response(res, 'Failed to create', {}, 400, false)
+          const results = await Skills.create(value)
+          if (results) {
+            const send = {
+              skillId: results.id,
+              userId: id
+            }
+            const create = await skillUser.create(send)
+            if (create) {
+              return response(res, 'Skills created', { data: create, find })
+            } else {
+              return response(res, 'Failed to create', {}, 400, false)
+            }
+          } else {
+            return response(res, 'Failed to create', {}, 400, false)
+          }
         }
       }
     } catch (e) {
@@ -36,14 +59,44 @@ module.exports = {
       if (error) {
         return response(res, error.message, {}, 400, false)
       } else {
-        const find = await Skills.findOne({
-          where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+        const result = await Skills.findOne({
+          where: {
+            name: value.name
+          }
         })
-        if (find) {
-          find.update(value)
-          return response(res, 'update skills successfully', { data: value })
+        if (result) {
+          const find = await skillUser.findOne({
+            where: { [Op.and]: [{ userId: idUser }, { skillId: id }] }
+          })
+          if (find) {
+            const send = {
+              skillId: find.id,
+              userId: idUser
+            }
+            find.update(send)
+            return response(res, 'update skills successfully', { data: value })
+          } else {
+            return response(res, 'Failed to update', {}, 400, false)
+          }
         } else {
-          return response(res, 'update skill failed', {}, 400, false)
+          const results = await Skills.create(value)
+          if (results) {
+            const find = await skillUser.findOne({
+              where: { [Op.and]: [{ userId: idUser }, { skillId: id }] }
+            })
+            if (find) {
+              const send = {
+                skillId: results.id,
+                userId: idUser
+              }
+              find.update(send)
+              return response(res, 'update skills successfully', { data: value })
+            } else {
+              return response(res, 'Failed to update', {}, 400, false)
+            }
+          } else {
+            return response(res, 'Failed to update', {}, 400, false)
+          }
         }
       }
     } catch (e) {
@@ -54,8 +107,8 @@ module.exports = {
     try {
       const idUser = req.user.id
       const { id } = req.params
-      const find = await Skills.findOne({
-        where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+      const find = await skillUser.findOne({
+        where: { [Op.and]: [{ userId: idUser }, { skillId: id }] }
       })
       if (find) {
         await find.destroy()

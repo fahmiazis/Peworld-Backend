@@ -1,4 +1,4 @@
-const { Users, Company, ImagePortfolio, UserDetails, Portfolio, ImageProfile, Experience, Skills } = require('../models')
+const { Users, Company, ImagePortfolio, UserDetails, Portfolio, ImageProfile, Experience, skillUser, Skills } = require('../models')
 const { Op } = require('sequelize')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
@@ -183,8 +183,13 @@ module.exports = {
       if (sortValue === 'domicile') {
         const result = await UserDetails.findAndCountAll({
           include: [
+<<<<<<< HEAD
             { model: ImageProfile, as: 'companyAvatar' },
             { model: Skills, as: 'skills', limit: 3 }
+=======
+            { model: ImageProfile, as: 'avatar' },
+            { model: skillUser, as: 'skills', limit: 3, include: [{ model: skillUser, as: 'skill' }] }
+>>>>>>> listJob
           ],
           where: {
             [Op.or]: [
@@ -209,8 +214,13 @@ module.exports = {
       } else {
         const result = await UserDetails.findAndCountAll({
           include: [
+<<<<<<< HEAD
             { model: ImageProfile, as: 'companyAvatar' },
             { model: Skills, as: 'skills', limit: 3 }
+=======
+            { model: ImageProfile, as: 'avatar' },
+            { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
+>>>>>>> listJob
           ],
           where: {
             [Op.or]: [
@@ -244,7 +254,7 @@ module.exports = {
           { model: ImageProfile, as: 'profileAvatar' },
           { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
           { model: Experience, as: 'experience' },
-          { model: Skills, as: 'skills' }
+          { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
         ],
         where: { userId: id }
       })
