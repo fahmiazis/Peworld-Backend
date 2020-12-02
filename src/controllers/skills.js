@@ -152,7 +152,7 @@ module.exports = {
           name: { [Op.like]: `%${searchValue}%` }
         },
         include: [
-          { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
+          { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'avatar' }] }] }
         ],
         order: [['name', 'ASC']],
         limit: limit,
