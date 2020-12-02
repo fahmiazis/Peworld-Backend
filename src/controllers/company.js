@@ -183,13 +183,8 @@ module.exports = {
       if (sortValue === 'domicile') {
         const result = await UserDetails.findAndCountAll({
           include: [
-<<<<<<< HEAD
-            { model: ImageProfile, as: 'companyAvatar' },
-            { model: Skills, as: 'skills', limit: 3 }
-=======
             { model: ImageProfile, as: 'avatar' },
             { model: skillUser, as: 'skills', limit: 3, include: [{ model: skillUser, as: 'skill' }] }
->>>>>>> listJob
           ],
           where: {
             [Op.or]: [
@@ -214,13 +209,8 @@ module.exports = {
       } else {
         const result = await UserDetails.findAndCountAll({
           include: [
-<<<<<<< HEAD
-            { model: ImageProfile, as: 'companyAvatar' },
-            { model: Skills, as: 'skills', limit: 3 }
-=======
             { model: ImageProfile, as: 'avatar' },
             { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
->>>>>>> listJob
           ],
           where: {
             [Op.or]: [
