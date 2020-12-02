@@ -6,35 +6,8 @@ const multer = require('multer')
 const { Op } = require('sequelize')
 
 module.exports = {
-  postPortofolio: async (req, res) => {
-    try {
-      const id = req.user.id
-      const { value, error } = portofolio.validate(req.body)
-      if (error) {
-        return response(res, error.message, {}, 400, false)
-      } else {
-        const data = {
-          ...value,
-          userId: id
-        }
-        const result = await Portfolio.create(data)
-        if (result) {
-          const results = await ImagePortfolio.create({ portFolioId: result.id })
-          if (results) {
-            return response(res, 'success create portofolio', { result })
-          } else {
-            return response(res, 'fail to create portofolio', {}, 400, false)
-          }
-        } else {
-          return response(res, 'fail to create portofolio', {}, 400, false)
-        }
-      }
-    } catch (e) {
-      return response(res, e.message, {}, 500, false)
-    }
-  },
   uploadPicturePortofolio: (req, res) => {
-    const { id } = req.params
+    const id = req.user.id
     uploadHelper(req, res, async function (err) {
       try {
         if (err instanceof multer.MulterError) {
@@ -54,19 +27,29 @@ module.exports = {
             image = image.slice(0, image.length - 2)
           }
         }
-        const data = {
-          picture: image
-        }
-        const find = await ImagePortfolio.findOne({ where: { portFolioId: id } })
-        if (find) {
-          const results = await find.update(data)
-          if (results) {
-            return response(res, 'upload image succesfully', { picture: image })
-          } else {
-            return response(res, 'upload image failed', {}, 400, false)
-          }
+        const { value, error } = portofolio.validate(req.body)
+        if (error) {
+          return response(res, error.message, {}, 400, false)
         } else {
-          return response(res, 'upload image failed', {}, 400, false)
+          const data = {
+            ...value,
+            userId: id
+          }
+          const result = await Portfolio.create(data)
+          if (result) {
+            const pict = {
+              picture: image,
+              portFolioId: result.id
+            }
+            const results = await ImagePortfolio.create(pict)
+            if (results) {
+              return response(res, 'success create portofolio', { result, results })
+            } else {
+              return response(res, 'fail to create portofolio', {}, 400, false)
+            }
+          } else {
+            return response(res, 'fail to create portofolio', {}, 400, false)
+          }
         }
       } catch (e) {
         return response(res, e.message, {}, 500, false)

@@ -1,21 +1,14 @@
-const { Users, UserDetails, Company, ImageProfile } = require('../models')
+const { Users, Company, ImagePortfolio, UserDetails, Portfolio, ImageProfile, Experience, Skills } = require('../models')
 const { Op } = require('sequelize')
-const qs = require('querystring')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
 const bcrypt = require('bcrypt')
 const fs = require('fs')
 const { updateUser, updateCompany } = require('../helpers/validation')
-const { APP_URL, APP_PORT } = process.env
 const response = require('../helpers/response')
+const { pagination } = require('../helpers/pagination')
 
 module.exports = {
-  /* ----------------------------------------------------------
-  *
-  *  - Under Here is for get profile of company,
-  *    update company or update user
-  *
-  * ----------------------------------------------------------- */
   profile: async (req, res) => {
     try {
       const { id } = req.user
@@ -159,24 +152,20 @@ module.exports = {
       }
     })
   },
-  /* ----------------------------------------------------------
-  *
-  *   Under Here is for searching or get list of job seeker all,
-  *   or get job seeker by id
-  *
-  * ----------------------------------------------------------- */
   listJobSeekers: async (req, res) => {
     try {
-      let { limit, page, search } = req.query
+      let { limit, page, search, sort } = req.query
       let searchValue = ''
-      let searchKey = ''
-      let find = {}
+      let sortValue = ''
       if (typeof search === 'object') {
-        searchKey = Object.keys(search)[0]
         searchValue = Object.values(search)[0]
       } else {
-        searchKey = 'name'
         searchValue = search || ''
+      }
+      if (typeof sort === 'object') {
+        sortValue = Object.values(sort)[0]
+      } else {
+        sortValue = sort || 'createdAt'
       }
       if (!limit) {
         limit = 5
@@ -188,37 +177,57 @@ module.exports = {
       } else {
         page = parseInt(page)
       }
-      if (searchKey === 'name') {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
+      if (sortValue === 'domicile') {
+        const result = await UserDetails.findAndCountAll({
+          include: [
+            { model: ImageProfile, as: 'avatar' },
+            { model: Skills, as: 'skills', limit: 3 }
+          ],
+          where: {
+            [Op.or]: [
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobTitle: { [Op.like]: `%${searchValue}%` } },
+              { workplace: { [Op.like]: `%${searchValue}%` } },
+              { domicile: { [Op.like]: `%${searchValue}%` } }
+            ],
+            domicile: typeof domicile === 'string'
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
+        if (result) {
+          return response(res, 'list job seeker', { result, pageInfo })
+        } else {
+          return response(res, 'fail to get job seeker', {}, 400, false)
+        }
       } else {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
-      }
-      const result = await UserDetails.findAndCountAll({
-        where: find,
-        order: [['createdAt', 'ASC'], ['jobTitle', 'ASC']],
-        limit: limit,
-        offset: (page - 1) * limit
-      })
-      const pageInfo = {
-        count: result.count,
-        pages: 0,
-        currentPage: page,
-        limitPerPage: limit,
-        nextLink: null,
-        prevLink: null
-      }
-      pageInfo.pages = Math.ceil(result.count / limit)
-      const { pages, currentPage } = pageInfo
-      if (currentPage < pages) {
-        pageInfo.nextLink = `http://${APP_URL}:${APP_PORT}/company/job-seeker/all?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
-      }
-      if (currentPage > 1) {
-        pageInfo.prevLink = `http://${APP_URL}:${APP_PORT}/company/job-seeker/all?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
-      }
-      if (result) {
-        return response(res, 'list job seeker', { result, pageInfo })
-      } else {
-        return response(res, 'fail to get job seeker', {}, 400, false)
+        const result = await UserDetails.findAndCountAll({
+          include: [
+            { model: ImageProfile, as: 'avatar' },
+            { model: Skills, as: 'skills', limit: 3 }
+          ],
+          where: {
+            [Op.or]: [
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobTitle: { [Op.like]: `%${searchValue}%` } },
+              { workplace: { [Op.like]: `%${searchValue}%` } },
+              { domicile: { [Op.like]: `%${searchValue}%` } }
+            ]
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
+        if (result) {
+          return response(res, 'list job seeker', { result, pageInfo })
+        } else {
+          return response(res, 'fail to get job seeker', {}, 400, false)
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -228,6 +237,12 @@ module.exports = {
     try {
       const { id } = req.params
       const result = await UserDetails.findOne({
+        include: [
+          { model: ImageProfile, as: 'avatar' },
+          { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
+          { model: Experience, as: 'experience' },
+          { model: Skills, as: 'skills' }
+        ],
         where: { userId: id }
       })
       if (result) {
