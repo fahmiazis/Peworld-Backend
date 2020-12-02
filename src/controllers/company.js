@@ -183,7 +183,7 @@ module.exports = {
       if (sortValue === 'domicile') {
         const result = await UserDetails.findAndCountAll({
           include: [
-            { model: ImageProfile, as: 'avatar' },
+            { model: ImageProfile, as: 'companyAvatar' },
             { model: Skills, as: 'skills', limit: 3 }
           ],
           where: {
@@ -209,7 +209,7 @@ module.exports = {
       } else {
         const result = await UserDetails.findAndCountAll({
           include: [
-            { model: ImageProfile, as: 'avatar' },
+            { model: ImageProfile, as: 'companyAvatar' },
             { model: Skills, as: 'skills', limit: 3 }
           ],
           where: {
@@ -241,7 +241,7 @@ module.exports = {
       const { id } = req.params
       const result = await UserDetails.findOne({
         include: [
-          { model: ImageProfile, as: 'avatar' },
+          { model: ImageProfile, as: 'profileAvatar' },
           { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
           { model: Experience, as: 'experience' },
           { model: Skills, as: 'skills' }
