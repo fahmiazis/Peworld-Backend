@@ -50,15 +50,12 @@ module.exports = {
     domicile: joi.string(),
     github: joi.string(),
     instagram: joi.string()
-<<<<<<< HEAD
   }),
   experienceSeeker: joi.object({
     jobDesk: joi.string().required(),
     company: joi.string().required(),
     year: joi.number().integer().min(1900).required(),
     description: joi.string().required()
-=======
->>>>>>> cda154c264e7a4624e488d2700c5177fc8912921
   }),
   portofolio: joi.object({
     name: joi.string().required(),
@@ -75,8 +72,6 @@ module.exports = {
     github: joi.string(),
     workplace: joi.string(),
     type: joi.string()
-<<<<<<< HEAD
-=======
   }),
   updateSeeker: joi.object({
     email: joi.string(),
@@ -87,6 +82,5 @@ module.exports = {
     company: joi.string().required(),
     year: joi.number().integer().min(1900).required(),
     description: joi.string().required()
->>>>>>> cda154c264e7a4624e488d2700c5177fc8912921
   })
 }
