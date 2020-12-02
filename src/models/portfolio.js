@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'picture',
         foreignKey: 'portFolioId'
       })
+
+      Portfolio.belongsTo(models.UserDetails, {
+        as: 'user',
+        foreignKey: 'userId'
+      })
     }
   };
   Portfolio.init({
