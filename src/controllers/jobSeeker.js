@@ -185,6 +185,11 @@ module.exports = {
         find = { name: { [Op.like]: `%${searchValue}%` } }
       }
       const result = await Company.findAndCountAll({
+        include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+        },
         where: find,
         order: [['createdAt', 'ASC']],
         limit: limit,
@@ -219,6 +224,11 @@ module.exports = {
     try {
       const { id } = req.params
       const result = await Company.findOne({
+        include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+        },
         where: { id: id }
       })
       if (result) {
