@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'skillId',
         as: 'skill'
       })
+
+      skillUser.belongsTo(models.UserDetails, {
+        foreignKey: 'userId',
+        as: 'user'
+      })
     }
   };
   skillUser.init({
