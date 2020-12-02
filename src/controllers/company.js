@@ -9,12 +9,6 @@ const response = require('../helpers/response')
 const { pagination } = require('../helpers/pagination')
 
 module.exports = {
-  /* ----------------------------------------------------------
-  *
-  *  - Under Here is for get profile of company,
-  *    update company or update user
-  *
-  * ----------------------------------------------------------- */
   profile: async (req, res) => {
     try {
       const { id } = req.user
@@ -158,12 +152,6 @@ module.exports = {
       }
     })
   },
-  /* ----------------------------------------------------------
-  *
-  *   Under Here is for searching or get list of job seeker all,
-  *   or get job seeker by id
-  *
-  * ----------------------------------------------------------- */
   listJobSeekers: async (req, res) => {
     try {
       let { limit, page, search, sort } = req.query
