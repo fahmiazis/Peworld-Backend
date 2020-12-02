@@ -1,6 +1,9 @@
-const { UserDetails, Users, ImageProfile } = require('../models')
+const { UserDetails, Company, Users, ImageProfile } = require('../models')
+const { Op } = require('sequelize')
+const qs = require('querystring')
+const { APP_URL, APP_PORT } = process.env
 const response = require('../helpers/response')
-const { updateDetailSeeker, updateSeeker } = require('../helpers/validation')
+const { updateDetailSeeker, updateUser } = require('../helpers/validation')
 const bcrypt = require('bcrypt')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
@@ -11,6 +14,11 @@ module.exports = {
     try {
       const { id } = req.user
       const result = await UserDetails.findOne({
+        include: {
+          model: ImageProfile,
+          attributes: ['id', 'avatar'],
+          as: 'profileAvatar'
+        },
         where: { userId: id }
       })
       if (result) {
@@ -25,7 +33,7 @@ module.exports = {
   updateUser: async (req, res) => {
     try {
       const { id } = req.user
-      const { value, error } = updateSeeker.validate(req.body)
+      const { value, error } = updateUser.validate(req.body)
       if (error) {
         return response(res, error.message, {}, 400, false)
       }
@@ -144,5 +152,79 @@ module.exports = {
         return response(res, e.message, {}, 401, false)
       }
     })
+  },
+  listCompany: async (req, res) => {
+    try {
+      let { limit, page, search } = req.query
+      let searchValue = ''
+      let searchKey = ''
+      let find = {}
+      if (typeof search === 'object') {
+        searchKey = Object.keys(search)[0]
+        searchValue = Object.values(search)[0]
+      } else {
+        searchKey = 'name'
+        searchValue = search || ''
+      }
+      if (!limit) {
+        limit = 5
+      } else {
+        limit = parseInt(limit)
+      }
+      if (!page) {
+        page = 1
+      } else {
+        page = parseInt(page)
+      }
+      if (searchKey === 'name') {
+        find = { name: { [Op.like]: `%${searchValue}%` } }
+      } else {
+        find = { name: { [Op.like]: `%${searchValue}%` } }
+      }
+      const result = await Company.findAndCountAll({
+        where: find,
+        order: [['createdAt', 'ASC']],
+        limit: limit,
+        offset: (page - 1) * limit
+      })
+      const pageInfo = {
+        count: result.count,
+        pages: 0,
+        currentPage: page,
+        limitPerPage: limit,
+        nextLink: null,
+        prevLink: null
+      }
+      pageInfo.pages = Math.ceil(result.count / limit)
+      const { pages, currentPage } = pageInfo
+      if (currentPage < pages) {
+        pageInfo.nextLink = `http://${APP_URL}:${APP_PORT}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
+      }
+      if (currentPage > 1) {
+        pageInfo.prevLink = `http://${APP_URL}:${APP_PORT}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
+      }
+      if (result) {
+        return response(res, 'list companies', { result, pageInfo })
+      } else {
+        return response(res, 'fail to get companies', {}, 400, false)
+      }
+    } catch (e) {
+      return response(res, e.message, {}, 500, false)
+    }
+  },
+  detailCompany: async (req, res) => {
+    try {
+      const { id } = req.params
+      const result = await Company.findOne({
+        where: { id: id }
+      })
+      if (result) {
+        return response(res, 'detail companies', { result })
+      } else {
+        return response(res, 'fail to get detail companies', {}, 400, false)
+      }
+    } catch (e) {
+      return response(res, e.message, {}, 500, false)
+    }
   }
 }
