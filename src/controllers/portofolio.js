@@ -1,4 +1,4 @@
-const { Portfolio, ImagePortfolio } = require('../models')
+const { Portfolio, ImagePortfolio, UserDetails, ImageProfile } = require('../models')
 const response = require('../helpers/response')
 const { portofolio, updatePortofolio } = require('../helpers/validation')
 const uploadHelper = require('../helpers/upload')
@@ -59,13 +59,24 @@ module.exports = {
   getAllPortofolio: async (req, res) => {
     const id = req.user.id
     try {
-      const result = await Portfolio.findAndCountAll({
-        where: { userId: id }
+      const user = await UserDetails.findOne({
+        where: {
+          userId: id
+        },
+        include: [{ model: ImageProfile, as: 'profileAvatar' }]
       })
-      if (result) {
-        return response(res, 'success get portofolio', { result })
-      } else {
-        return response(res, 'fail to get portofolio', {}, 400, false)
+      if (user) {
+        const result = await Portfolio.findAndCountAll({
+          where: { userId: id },
+          include: [
+            { model: ImagePortfolio, as: 'picture' }
+          ]
+        })
+        if (result) {
+          return response(res, 'success get portofolio', { user, result })
+        } else {
+          return response(res, 'fail to get portofolio', {}, 400, false)
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -102,7 +113,11 @@ module.exports = {
     const { id } = req.params
     try {
       const find = await Portfolio.findOne({
-        where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+        where: { [Op.and]: [{ userId: idUser }, { id: id }] },
+        include: [
+          { model: ImagePortfolio, as: 'picture' },
+          { model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }
+        ]
       })
       if (find) {
         return response(res, 'success get portofolio', { find })
