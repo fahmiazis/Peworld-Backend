@@ -1,4 +1,4 @@
-const { Users, Company, ImagePortfolio, UserDetails, Portfolio, ImageProfile, Experience, Skills } = require('../models')
+const { Users, Company, ImagePortfolio, UserDetails, Portfolio, ImageProfile, Experience, skillUser, Skills } = require('../models')
 const { Op } = require('sequelize')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
@@ -181,7 +181,7 @@ module.exports = {
         const result = await UserDetails.findAndCountAll({
           include: [
             { model: ImageProfile, as: 'avatar' },
-            { model: Skills, as: 'skills', limit: 3 }
+            { model: skillUser, as: 'skills', limit: 3, include: [{ model: skillUser, as: 'skill' }] }
           ],
           where: {
             [Op.or]: [
@@ -207,7 +207,7 @@ module.exports = {
         const result = await UserDetails.findAndCountAll({
           include: [
             { model: ImageProfile, as: 'avatar' },
-            { model: Skills, as: 'skills', limit: 3 }
+            { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
           ],
           where: {
             [Op.or]: [
@@ -241,7 +241,7 @@ module.exports = {
           { model: ImageProfile, as: 'avatar' },
           { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
           { model: Experience, as: 'experience' },
-          { model: Skills, as: 'skills' }
+          { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
         ],
         where: { userId: id }
       })

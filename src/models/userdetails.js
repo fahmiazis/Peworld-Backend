@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       })
 
-      UserDetails.hasMany(models.Skills, {
+      UserDetails.hasMany(models.skillUser, {
         as: 'skills',
         foreignKey: 'userId'
       })
