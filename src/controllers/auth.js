@@ -11,7 +11,7 @@ const {
   registerCompany,
   login
 } = require('../helpers/validation')
-const { verifyRefreshToken, signRefreshToken,signAcessToken } = require('../middleware/auth')
+const { verifyRefreshToken, signRefreshToken, signAcessToken } = require('../middleware/auth')
 
 module.exports = {
   register: async (req, res) => {
@@ -130,7 +130,7 @@ module.exports = {
           switch (role) {
             case 'job-seeker': {
               if (roleId === 1) {
-                const refreshToken = await signRefreshToken(find.id,roleId)
+                const refreshToken = await signRefreshToken(find.id, roleId)
                 jwt.sign(
                   { id: find.id, roleId: 1 },
                   SEEKER_KEY,
