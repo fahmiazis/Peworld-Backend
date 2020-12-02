@@ -14,11 +14,14 @@ module.exports = {
     try {
       const { id } = req.user
       const result = await UserDetails.findOne({
-        include: {
+        include: [{
+          model: Users,
+          attributes: ['id', 'email', 'roleId']
+        }, {
           model: ImageProfile,
           attributes: ['id', 'avatar'],
           as: 'profileAvatar'
-        },
+        }],
         where: { userId: id }
       })
       if (result) {
