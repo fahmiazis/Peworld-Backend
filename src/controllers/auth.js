@@ -107,7 +107,7 @@ module.exports = {
           switch (role) {
             case 'job-seeker': {
               if (roleId === 1) {
-                jwt.sign({ id: find.id }, SEEKER_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
+                jwt.sign({ id: find.id, roleId: 1 }, SEEKER_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
                   if (err) {
                     return response(res, err.message, 500, false)
                   } else {
@@ -121,7 +121,7 @@ module.exports = {
             }
             case 'company': {
               if (roleId === 2) {
-                jwt.sign({ id: find.id }, COMPANY_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
+                jwt.sign({ id: find.id, roleId: 2 }, COMPANY_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
                   if (err) {
                     return response(res, err.message, 500, false)
                   } else {
