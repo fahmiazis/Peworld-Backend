@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const cors = require('cors')
-const response = require('../helpers/response')
+const response = require('./helpers/response')
 
 const app = express()
 const { APP_PORT } = process.env
