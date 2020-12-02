@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       // define association here
+      Portfolio.hasOne(models.ImagePortfolio, {
+        as: 'picture',
+        foreignKey: 'portFolioId'
+      })
     }
   };
   Portfolio.init({

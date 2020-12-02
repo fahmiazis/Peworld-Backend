@@ -1,8 +1,8 @@
 const route = require('express').Router()
 const jobSeek = require('../controllers/company')
 
-route.get('/job-seeker/all', jobSeek.getUsers)
-route.get('/job-seeker/:id', jobSeek.getDetailUser)
+route.get('/job-seeker/all', jobSeek.listJobSeekers)
+route.get('/job-seeker/:id', jobSeek.detailJobSeeker)
 
 const messageController = require('../controllers/message')
 
