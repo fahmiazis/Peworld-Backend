@@ -24,7 +24,7 @@ module.exports = {
         include: {
           model: ImageProfile,
           attribute: ['id', 'avatar'],
-          as: 'profileAvatar'
+          as: 'companyAvatar'
         }
       })
       if (result) {
@@ -231,9 +231,9 @@ module.exports = {
         where: { userId: id }
       })
       if (result) {
-        return response(res, 'detail user', { result })
+        return response(res, 'detail job seeker', { result })
       } else {
-        return response(res, 'fail to get detail user', {}, 400, false)
+        return response(res, 'fail to get detail job seeker', {}, 400, false)
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
