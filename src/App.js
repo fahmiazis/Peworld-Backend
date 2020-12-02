@@ -27,7 +27,7 @@ app.use('/job-seeker', authSeeker, jobSeekerRoutes)
 app.use('/company', authCompany, companyRoutes)
 
 app.get('*', (req, res) => {
-  response(res, 'Error page not found', {}, 404, false)
+  response(res, 'Error route not found', {}, 404, false)
 })
 
 app.listen(APP_PORT, () => {
