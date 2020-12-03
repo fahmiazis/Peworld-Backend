@@ -78,8 +78,8 @@ module.exports = {
           isLatest: true
         },
         order: [['createdAt', 'DESC']],
-        limit: pageInfo.limit,
-        offset: pageInfo.offset,
+        limit: pageInfo.limitPerPage,
+        offset: (pageInfo.currentPage - 1) * pageInfo.limitPerPage,
         include: [
           {
             model: Users,
@@ -185,8 +185,8 @@ module.exports = {
             }
           },
           order: [['createdAt', 'DESC']],
-          limit: pageInfo.limit,
-          offset: pageInfo.offset
+          limit: pageInfo.limitPerPage,
+          offset: (pageInfo.currentPage - 1) * pageInfo.limitPerPage
         })
 
         if (results) {
