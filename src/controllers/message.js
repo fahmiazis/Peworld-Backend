@@ -5,6 +5,7 @@ const { Op } = require('sequelize')
 const response = require('../helpers/response')
 const { message } = require('../helpers/validation')
 const { pagination } = require('../helpers/pagination')
+const io = require('../App')
 
 module.exports = {
   sendMsg: async (req, res) => {
@@ -43,6 +44,7 @@ module.exports = {
           const send = await Message.create(data)
 
           if (send) {
+            io.emit(recipient, { sender, message: content })
             return response(res, 'Send message successfully', { data: send }, 201)
           } else {
             return response(res, 'Failed to send message', {}, 400, false)
