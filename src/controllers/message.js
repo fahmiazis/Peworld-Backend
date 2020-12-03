@@ -1,4 +1,4 @@
-const { Users, Message, UserDetails, Company } = require('../models')
+const { Users, Message, UserDetails, Company, ImageProfile } = require('../models')
 
 const { Op } = require('sequelize')
 
@@ -82,24 +82,58 @@ module.exports = {
           {
             model: Users,
             as: 'senderInfo',
+            attributes: ['id'],
             include: [
               {
-                model: UserDetails
+                model: UserDetails,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attributes: ['id', 'avatar'],
+                    as: 'profileAvatar'
+                  }
+                ]
               },
               {
-                model: Company
+                model: Company,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attribute: ['id', 'avatar'],
+                    as: 'companyAvatar'
+                  }
+                ]
               }
             ]
           },
           {
             model: Users,
             as: 'recipientInfo',
+            attributes: ['id'],
             include: [
               {
-                model: UserDetails
+                model: UserDetails,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attributes: ['id', 'avatar'],
+                    as: 'profileAvatar'
+                  }
+                ]
               },
               {
-                model: Company
+                model: Company,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attribute: ['id', 'avatar'],
+                    as: 'companyAvatar'
+                  }
+                ]
               }
             ]
           }
