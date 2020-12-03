@@ -1,6 +1,7 @@
-const { Experience } = require('../models')
+const { Experience, ImageProfile, UserDetails } = require('../models')
 const response = require('../helpers/response')
 const { experienceSeeker } = require('../helpers/validation')
+const { Op } = require('sequelize')
 
 module.exports = {
   create: async (req, res) => {
@@ -26,12 +27,23 @@ module.exports = {
     }
   },
   getAll: async (req, res) => {
+    const id = req.user.id
     try {
-      const result = await Experience.findAll()
-      if (result) {
-        return response(res, 'Data experience job-seeker', { result })
-      } else {
-        return response(res, 'No data found', {})
+      const user = await UserDetails.findOne({
+        where: {
+          userId: id
+        },
+        include: [{ model: ImageProfile, as: 'profileAvatar' }]
+      })
+      if (user) {
+        const result = await Experience.findAndCountAll({
+          where: { userId: id }
+        })
+        if (result) {
+          return response(res, 'Data experience job-seeker', { user, result })
+        } else {
+          return response(res, 'No data found', {})
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -40,7 +52,13 @@ module.exports = {
   get: async (req, res) => {
     try {
       const { id } = req.params
-      const result = await Experience.findByPk(id)
+      const idUser = req.user.id
+      const result = await Experience.findOne({
+        where: {
+          [Op.and]: [{ userId: idUser }, { id: id }]
+        },
+        include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }]
+      })
       if (result) {
         return response(res, `Data experience ${id}`, { result })
       } else {
