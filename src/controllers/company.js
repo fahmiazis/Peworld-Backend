@@ -184,7 +184,7 @@ module.exports = {
         const result = await UserDetails.findAndCountAll({
           include: [
             { model: ImageProfile, as: 'profileAvatar' },
-            { model: skillUser, as: 'skills', include: [{ model: skillUser, as: 'skill' }] }
+            { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
           ],
           where: {
             [Op.or]: [
@@ -201,8 +201,27 @@ module.exports = {
           offset: (page - 1) * limit
         })
         const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
-        if (result) {
+        if (result.count !== 0) {
           return response(res, 'list job seeker', { result, pageInfo })
+        } else if (result.count === 0) {
+          const results = await Skills.findAndCountAll({
+            where: {
+              [Op.or]: [
+                { name: { [Op.like]: `%${searchValue}%` } }
+              ]
+            },
+            include: [
+              { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
+            ],
+            limit: limit,
+            offset: (page - 1) * limit
+          })
+          const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, results.count)
+          if (results) {
+            return response(res, 'list job seeker', { results, pageInfo })
+          } else {
+            return response(res, 'fail to get job seeker', {}, 400, false)
+          }
         } else {
           return response(res, 'fail to get job seeker', {}, 400, false)
         }
@@ -226,8 +245,27 @@ module.exports = {
           offset: (page - 1) * limit
         })
         const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
-        if (result) {
+        if (result.count !== 0) {
           return response(res, 'list job seeker', { result, pageInfo })
+        } else if (result.count === 0) {
+          const results = await Skills.findAndCountAll({
+            where: {
+              [Op.or]: [
+                { name: { [Op.like]: `%${searchValue}%` } }
+              ]
+            },
+            include: [
+              { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
+            ],
+            limit: limit,
+            offset: (page - 1) * limit
+          })
+          const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, results.count)
+          if (results) {
+            return response(res, 'list job seeker', { results, pageInfo })
+          } else {
+            return response(res, 'fail to get job seeker', {}, 400, false)
+          }
         } else {
           return response(res, 'fail to get job seeker', {}, 400, false)
         }
