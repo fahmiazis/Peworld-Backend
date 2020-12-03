@@ -1,4 +1,4 @@
-const { Users, Message } = require('../models')
+const { Users, Message, UserDetails, Company } = require('../models')
 
 const { Op } = require('sequelize')
 
@@ -77,7 +77,33 @@ module.exports = {
         },
         order: [['createdAt', 'DESC']],
         limit: pageInfo.limit,
-        offset: pageInfo.offset
+        offset: pageInfo.offset,
+        include: [
+          {
+            model: Users,
+            as: 'senderInfo',
+            include: [
+              {
+                model: UserDetails
+              },
+              {
+                model: Company
+              }
+            ]
+          },
+          {
+            model: Users,
+            as: 'recipientInfo',
+            include: [
+              {
+                model: UserDetails
+              },
+              {
+                model: Company
+              }
+            ]
+          }
+        ]
       })
 
       return response(res, 'List of message', { data: results, pageInfo })
