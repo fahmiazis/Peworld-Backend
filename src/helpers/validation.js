@@ -54,7 +54,7 @@ module.exports = {
   experienceSeeker: joi.object({
     jobDesk: joi.string().required(),
     company: joi.string().required(),
-    year: joi.number().integer().min(1900).required(),
+    year: joi.string().required(),
     description: joi.string().required()
   }),
   portofolio: joi.object({
