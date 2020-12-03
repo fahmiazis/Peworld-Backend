@@ -18,7 +18,11 @@ module.exports = (sequelize, DataTypes) => {
 
       skillUser.belongsTo(models.UserDetails, {
         foreignKey: 'userId',
-        as: 'user'
+        // as: 'user'
+      })
+      skillUser.belongsTo(models.Users, {
+        foreignKey: 'userId',
+        // as: 'user'
       })
     }
   };

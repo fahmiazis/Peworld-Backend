@@ -63,7 +63,7 @@ module.exports = {
           if (error) {
             return response(res, error.message, {}, 400, false)
           }
-          let { name, email, company, jobDesk, phone, password } = value
+          let { name, email, company, jobTitle, phone, password } = value
           password = await bcrypt.hash(password, await bcrypt.genSalt())
 
           const findEmail = await Users.findAll({ where: { email } })
@@ -80,27 +80,29 @@ module.exports = {
 
               const createUser = await Users.create(users)
               if (createUser) {
-                const details = {
+                const userData = {
                   name,
-                  company,
-                  jobDesk,
+                  workplace: company,
+                  jobTitle,
                   phone,
                   userId: createUser.id
                 }
-
-                const createDetails = await Company.create(details)
-                if (createDetails) {
-                  return response(
-                    res,
-                    'User created!',
-                    {
-                      data: { id: createUser.id, name, email, company, phone }
-                    },
-                    201
-                  )
-                } else {
-                  return response(res, 'Failed to create user', {}, 400, false)
+                await UserDetails.create(userData)
+                const companyData = {
+                  name: company,
+                  userId: createUser.id
                 }
+                await Company.create(companyData)
+                return response(
+                  res,
+                  'User created!',
+                  {
+                    data: { name, email, company, jobTitle, phone }
+                  },
+                  201
+                )
+              } else {
+                return response(res, 'Failed to create user', {}, 400, false)
               }
             }
           }

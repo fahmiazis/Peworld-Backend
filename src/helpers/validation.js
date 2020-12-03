@@ -28,7 +28,8 @@ module.exports = {
     email: joi.string(),
     description: joi.string(),
     instagram: joi.string(),
-    linkedin: joi.string()
+    linkedin: joi.string(),
+    address: joi.string()
   }),
   login: joi.object({
     email: joi.string().required(),

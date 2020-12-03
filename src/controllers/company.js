@@ -12,21 +12,38 @@ module.exports = {
   profile: async (req, res) => {
     try {
       const { id } = req.user
-      const result = await Company.findOne({
-        where: { userId: id },
+      // const result = await Company.findOne({
+      //   where: { userId: id },
+      //   include: [{
+      //     model: Users,
+      //     attributes: ['id', 'email', 'roleId']
+      //   }, {
+      //     model: ImageProfile,
+      //     attribute: ['id', 'avatar'],
+      //     as: 'companyAvatar'
+      //   }]
+      // })
+      const result = await Users.findOne({
+        where: { id: id },
+        attributes: ['id', 'email', 'roleId'],
         include: [{
-          model: Users,
-          attributes: ['id', 'email', 'roleId']
-        }, {
-          model: ImageProfile,
-          attribute: ['id', 'avatar'],
-          as: 'companyAvatar'
-        }]
+          model: UserDetails,
+          // as: 'recruiter'
+        },
+        {
+          model: Company,
+          include: {
+            model: ImageProfile,
+            attribute: ['id', 'avatar'],
+            as: 'companyAvatar'
+          }
+        }
+        ]
       })
       if (result) {
-        return response(res, `Company with id ${id}`, { result })
+        return response(res, `Recruiter with id ${id}`, { result })
       } else {
-        return response(res, 'fail to get Company Profile', {}, 400, false)
+        return response(res, 'fail to get Recruiter Profile', {}, 400, false)
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -39,21 +56,21 @@ module.exports = {
       if (error) {
         return response(res, error.message, {}, 400, false)
       }
-      const { name, company, jobDesk, phone, email, description, instagram, linkedin } = value
+      const { name, jobDesk, phone, email, description, instagram, linkedin, address } = value
       const result = await Company.findOne({
         where: { userId: id }
       })
       if (result) {
-        if (name || company || jobDesk || phone || email || description || instagram || linkedin) {
+        if (name || jobDesk || phone || email || description || instagram || linkedin || address) {
           const data = {
             name,
-            company,
             jobDesk,
             phone,
             email,
             description,
             instagram,
-            linkedin
+            linkedin,
+            address
           }
           await result.update(data)
           return response(res, 'company Updated successfully!', { data }, 200)
@@ -181,22 +198,31 @@ module.exports = {
         page = parseInt(page)
       }
       if (sortValue === 'domicile') {
-        const result = await UserDetails.findAndCountAll({
-          include: [
-            { model: ImageProfile, as: 'profileAvatar' },
-            { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
-          ],
-          where: {
-            [Op.or]: [
-              { phone: { [Op.like]: `%${searchValue}%` } },
-              { name: { [Op.like]: `%${searchValue}%` } },
-              { jobTitle: { [Op.like]: `%${searchValue}%` } },
-              { workplace: { [Op.like]: `%${searchValue}%` } },
-              { domicile: { [Op.like]: `%${searchValue}%` } }
+        const result = await Users.findAndCountAll({
+          attributes: ['email', 'roleId'],
+          include: {
+            model: UserDetails,
+            include: [
+              { model: ImageProfile, as: 'profileAvatar' },
+              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
             ],
-            domicile: typeof domicile === 'string'
+            where: {
+              [Op.or]: [
+                { phone: { [Op.like]: `%${searchValue}%` } },
+                { name: { [Op.like]: `%${searchValue}%` } },
+                { jobTitle: { [Op.like]: `%${searchValue}%` } },
+                { workplace: { [Op.like]: `%${searchValue}%` } },
+                { domicile: { [Op.like]: `%${searchValue}%` } }
+              ],
+              domicile: typeof domicile === 'string'
+            },
+            order: [
+              [{ model: UserDetails }, sortValue, 'DESC']
+            ]
           },
-          order: [[`${sortValue}`, 'ASC']],
+          where: {
+            roleId: { [Op.not]: 2 }
+          },
           limit: limit,
           offset: (page - 1) * limit
         })
@@ -205,6 +231,7 @@ module.exports = {
           return response(res, 'list job seeker', { result, pageInfo })
         } else if (result.count === 0) {
           const results = await Skills.findAndCountAll({
+            attributes: ['email', 'roleId'],
             where: {
               [Op.or]: [
                 { name: { [Op.like]: `%${searchValue}%` } }
@@ -226,21 +253,30 @@ module.exports = {
           return response(res, 'fail to get job seeker', {}, 400, false)
         }
       } else {
-        const result = await UserDetails.findAndCountAll({
-          include: [
-            { model: ImageProfile, as: 'profileAvatar' },
-            { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
-          ],
-          where: {
-            [Op.or]: [
-              { phone: { [Op.like]: `%${searchValue}%` } },
-              { name: { [Op.like]: `%${searchValue}%` } },
-              { jobTitle: { [Op.like]: `%${searchValue}%` } },
-              { workplace: { [Op.like]: `%${searchValue}%` } },
-              { domicile: { [Op.like]: `%${searchValue}%` } }
+        const result = await Users.findAndCountAll({
+          attributes: ['email', 'roleId'],
+          include: {
+            model: UserDetails,
+            include: [
+              { model: ImageProfile, as: 'profileAvatar' },
+              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
+            ],
+            where: {
+              [Op.or]: [
+                { phone: { [Op.like]: `%${searchValue}%` } },
+                { name: { [Op.like]: `%${searchValue}%` } },
+                { jobTitle: { [Op.like]: `%${searchValue}%` } },
+                { workplace: { [Op.like]: `%${searchValue}%` } },
+                { domicile: { [Op.like]: `%${searchValue}%` } }
+              ]
+            },
+            order: [
+              [Users, sortValue, 'DESC']
             ]
           },
-          order: [[`${sortValue}`, 'ASC']],
+          where: {
+            roleId: { [Op.not]: 2 }
+          },
           limit: limit,
           offset: (page - 1) * limit
         })
@@ -255,14 +291,28 @@ module.exports = {
               ]
             },
             include: [
-              { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
+              {
+                model: skillUser, as: 'users', attributes: ['userId'], include: [{ model: UserDetails, include: [{ model: ImageProfile, as: 'profileAvatar' }, { model: skillUser, attributes: ['userId'], as: 'skills', include: [{ model: Skills, as: 'skill' }] }] }]
+              }
             ],
             limit: limit,
             offset: (page - 1) * limit
           })
           const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, results.count)
           if (results) {
-            return response(res, 'list job seeker', { results, pageInfo })
+            const users = results.rows
+            let hasil = users.map(user => {
+              return user.users
+            })
+            hasil = hasil[0]
+            // console.log(testing)
+            return response(res, 'list job seeker', {
+              result: {
+                count: results.count,
+                rows: hasil
+              },
+              pageInfo
+            })
           } else {
             return response(res, 'fail to get job seeker', {}, 400, false)
           }
@@ -277,14 +327,19 @@ module.exports = {
   detailJobSeeker: async (req, res) => {
     try {
       const { id } = req.params
-      const result = await UserDetails.findOne({
+      const result = await Users.findOne({
         include: [
-          { model: ImageProfile, as: 'profileAvatar' },
-          { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
-          { model: Experience, as: 'experience' },
-          { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
+          {
+            model: UserDetails,
+            include: [
+              { model: ImageProfile, as: 'profileAvatar' },
+              { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
+              { model: Experience, as: 'experience' },
+              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
+            ]
+          }
         ],
-        where: { userId: id }
+        where: { id: id, roleId: { [Op.not]: 2 } }
       })
       if (result) {
         return response(res, 'detail job seeker', { result })
