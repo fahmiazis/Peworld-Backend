@@ -70,7 +70,7 @@ module.exports = {
         }
       })
 
-      const pageInfo = pagination('job-seeker/message/list', req.query, page, limit, count)
+      const pageInfo = pagination(req.originalUrl.split('?')[0], req.query, page, limit, count)
 
       const results = await Message.findAll({
         where: {
@@ -164,7 +164,7 @@ module.exports = {
         }
       })
 
-      const pageInfo = pagination(`job-seeker/message/${friendId}`, req.query, page, limit, count)
+      const pageInfo = pagination(req.originalUrl.split('?')[0], req.query, page, limit, count)
 
       const read = await Message.update({ isRead: true }, {
         where: {
