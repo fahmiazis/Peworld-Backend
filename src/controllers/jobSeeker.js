@@ -4,7 +4,6 @@ const qs = require('querystring')
 const { APP_URL, APP_PORT } = process.env
 const response = require('../helpers/response')
 const { updateDetailSeeker, updateUser } = require('../helpers/validation')
-const { SEEKER_KEY, TOKEN_EXP } = process.env
 const bcrypt = require('bcrypt')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
@@ -15,11 +14,14 @@ module.exports = {
     try {
       const { id } = req.user
       const result = await UserDetails.findOne({
-        include: {
+        include: [{
+          model: Users,
+          attributes: ['id', 'email', 'roleId']
+        }, {
           model: ImageProfile,
           attributes: ['id', 'avatar'],
           as: 'profileAvatar'
-        },
+        }],
         where: { userId: id }
       })
       if (result) {
@@ -183,6 +185,11 @@ module.exports = {
         find = { name: { [Op.like]: `%${searchValue}%` } }
       }
       const result = await Company.findAndCountAll({
+        include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+        },
         where: find,
         order: [['createdAt', 'ASC']],
         limit: limit,
@@ -217,6 +224,11 @@ module.exports = {
     try {
       const { id } = req.params
       const result = await Company.findOne({
+        include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+        },
         where: { id: id }
       })
       if (result) {

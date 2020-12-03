@@ -15,7 +15,7 @@ module.exports = {
     name: joi.string().required(),
     email: joi.string().required(),
     company: joi.string().required(),
-    jobDesk: joi.string().required(),
+    jobTitle: joi.string().required(),
     phone: joi.string().required(),
     password: joi.string().required().min(8),
     confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
@@ -28,11 +28,15 @@ module.exports = {
     email: joi.string(),
     description: joi.string(),
     instagram: joi.string(),
-    linkedin: joi.string()
+    linkedin: joi.string(),
+    address: joi.string()
   }),
   login: joi.object({
     email: joi.string().required(),
     password: joi.string().required()
+  }),
+  message: joi.object({
+    content: joi.string().required()
   }),
   updateUser: joi.object({
     email: joi.string(),
@@ -47,6 +51,12 @@ module.exports = {
     domicile: joi.string(),
     github: joi.string(),
     instagram: joi.string()
+  }),
+  experienceSeeker: joi.object({
+    jobDesk: joi.string().required(),
+    company: joi.string().required(),
+    year: joi.number().integer().min(1900).required(),
+    description: joi.string().required()
   }),
   portofolio: joi.object({
     name: joi.string().required(),
@@ -63,5 +73,9 @@ module.exports = {
     github: joi.string(),
     workplace: joi.string(),
     type: joi.string()
+  }),
+  updateSeeker: joi.object({
+    email: joi.string(),
+    password: joi.string()
   })
 }

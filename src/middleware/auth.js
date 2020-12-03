@@ -41,5 +41,54 @@ module.exports = {
     } else {
       return response(res, 'Forbidden Access', {}, 403, false)
     }
+  },
+  signAcessToken: (userid, role) => {
+    return new Promise((resolve, reject) => {
+      const payload = {
+        userid,
+        role
+      }
+      const secret = process.env.SEEKER_KEY
+      const options = {
+      }
+      jwt.sign(payload, secret, options, (err, token) => {
+        if (err) {
+          console.log(err)
+          reject(err)
+        }
+        resolve(token)
+      })
+    })
+  },
+  signRefreshToken: (userid, role) => {
+    return new Promise((resolve, reject) => {
+      const payload = {
+        id: userid,
+        role
+      }
+      const secret = process.env.REFRESH_TOKEN_SECRET
+      const options = {
+      }
+      jwt.sign(payload, secret, options, (err, token) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(token)
+      })
+    })
+  },
+  verifyRefreshToken: (refreshToken) => {
+    return new Promise((resolve, reject) => {
+      jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, payload) => {
+        if (err) return reject(err)
+        const userId = payload.id
+        const role = payload.role
+        const data = {
+          userId,
+          role
+        }
+        resolve(data)
+      })
+    })
   }
 }

@@ -6,7 +6,12 @@ const jwt = require('jsonwebtoken')
 const { SEEKER_KEY, COMPANY_KEY, TOKEN_EXP } = process.env
 
 const response = require('../helpers/response')
-const { registerSeeker, registerCompany, login } = require('../helpers/validation')
+const {
+  registerSeeker,
+  registerCompany,
+  login
+} = require('../helpers/validation')
+const { verifyRefreshToken, signRefreshToken, signAcessToken } = require('../middleware/auth')
 
 module.exports = {
   register: async (req, res) => {
@@ -21,17 +26,34 @@ module.exports = {
           let { name, email, phone, password } = value
           password = await bcrypt.hash(password, await bcrypt.genSalt())
 
-          const users = { email, password, roleId: 1 }
+          const findEmail = await Users.findAll({ where: { email } })
 
-          const createUser = await Users.create(users)
-          if (createUser) {
-            const details = { name, phone, userId: createUser.id }
+          if (findEmail.length) {
+            return response(res, 'Email already used', {}, 400, false)
+          } else {
+            const findPhone = await UserDetails.findAll({ where: { phone } })
 
-            const createDetails = await UserDetails.create(details)
-            if (createDetails) {
-              return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)
+            if (findPhone.length) {
+              return response(res, 'Phone already used', {}, 400, false)
             } else {
-              return response(res, 'Failed to create user', {}, 400, false)
+              const users = { email, password, roleId: 1 }
+
+              const createUser = await Users.create(users)
+              if (createUser) {
+                const details = { name, phone, userId: createUser.id }
+
+                const createDetails = await UserDetails.create(details)
+                if (createDetails) {
+                  return response(
+                    res,
+                    'User created!',
+                    { data: { id: createUser.id, email, name, phone } },
+                    201
+                  )
+                } else {
+                  return response(res, 'Failed to create user', {}, 400, false)
+                }
+              }
             }
           }
           break
@@ -41,20 +63,48 @@ module.exports = {
           if (error) {
             return response(res, error.message, {}, 400, false)
           }
-          console.log(value)
-          let { name, email, company, jobDesk, phone, password } = value
+          let { name, email, company, jobTitle, phone, password } = value
           password = await bcrypt.hash(password, await bcrypt.genSalt())
 
-          const users = { email, password, roleId: 2 }
+          const findEmail = await Users.findAll({ where: { email } })
 
-          const createUser = await Users.create(users)
-          if (createUser) {
-            const details = { name, company, jobDesk, phone, userId: createUser.id }
-            const createDetails = await Company.create(details)
-            if (createDetails) {
-              return response(res, 'User created!', { data: { id: createUser.id, ...value } }, 201)
+          if (findEmail.length) {
+            return response(res, 'Email already used', {}, 400, false)
+          } else {
+            const findPhone = await Company.findAll({ where: { phone } })
+
+            if (findPhone.length) {
+              return response(res, 'Phone already used', {}, 400, false)
             } else {
-              return response(res, 'Failed to create user', {}, 400, false)
+              const users = { email, password, roleId: 2 }
+
+              const createUser = await Users.create(users)
+              if (createUser) {
+                const userData = {
+                  name,
+                  workplace: company,
+                  jobTitle,
+                  phone,
+                  userId: createUser.id
+                }
+                await UserDetails.create(userData)
+
+                const companyData = {
+                  name: company,
+                  userId: createUser.id
+                }
+                await Company.create(companyData)
+                return response(
+                  res,
+                  'User created!',
+                  {
+                    data: { name, email, company, jobTitle, phone }
+                  },
+                  201
+                )
+              } else {
+                return response(res, 'Failed to create user', {}, 400, false)
+              }
             }
           }
         }
@@ -83,13 +133,22 @@ module.exports = {
           switch (role) {
             case 'job-seeker': {
               if (roleId === 1) {
-                jwt.sign({ id: find.id }, SEEKER_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
-                  if (err) {
-                    return response(res, err.message, 500, false)
-                  } else {
-                    return response(res, 'Login as job seeker successfully', { token })
+                const refreshToken = await signRefreshToken(find.id, roleId)
+                jwt.sign(
+                  { id: find.id, roleId: 1 },
+                  SEEKER_KEY,
+                  { expiresIn: TOKEN_EXP },
+                  (err, token) => {
+                    if (err) {
+                      return response(res, err.message, 500, false)
+                    } else {
+                      return response(res, 'Login as job seeker successfully', {
+                        token,
+                        refreshToken
+                      })
+                    }
                   }
-                })
+                )
               } else {
                 return response(res, 'Wrong email or password', {}, 400, false)
               }
@@ -97,13 +156,20 @@ module.exports = {
             }
             case 'company': {
               if (roleId === 2) {
-                jwt.sign({ id: find.id }, COMPANY_KEY, { expiresIn: TOKEN_EXP }, (err, token) => {
-                  if (err) {
-                    return response(res, err.message, 500, false)
-                  } else {
-                    return response(res, 'Login as company successfully', { token })
+                jwt.sign(
+                  { id: find.id, roleId: 2 },
+                  COMPANY_KEY,
+                  { expiresIn: TOKEN_EXP },
+                  (err, token) => {
+                    if (err) {
+                      return response(res, err.message, 500, false)
+                    } else {
+                      return response(res, 'Login as company successfully', {
+                        token
+                      })
+                    }
                   }
-                })
+                )
               } else {
                 return response(res, 'Wrong email or password', {}, 400, false)
               }
@@ -123,6 +189,22 @@ module.exports = {
     } catch (e) {
       console.log(e)
       return response(res, e.message, {}, 500, false)
+    }
+  },
+  resetPassword: async (req, res) => {},
+  refreshToken: async (req, res) => {
+    try {
+      const { refreshToken } = req.body
+      if (refreshToken === undefined) {
+        return response(res, 'Unauthorize', {}, 401, false)
+      }
+      const data = await verifyRefreshToken(refreshToken)
+      console.log(data)
+      const accessToken = await signAcessToken(data.id, data.role)
+      const refresToken = await signRefreshToken(data.id, data.role)
+      return response(res, 'Succesfully', { accessToken, refresToken })
+    } catch (error) {
+      console.log(error)
     }
   }
 }

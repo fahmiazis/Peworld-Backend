@@ -1,9 +1,8 @@
-const { Skills } = require('../models')
+const { Skills, skillUser, UserDetails, ImageProfile } = require('../models')
 const response = require('../helpers/response')
 const { role } = require('../helpers/validation')
 const { Op } = require('sequelize')
-const qs = require('querystring')
-const { APP_URL, APP_PORT } = process.env
+const { pagination } = require('../helpers/pagination')
 
 module.exports = {
   postSkill: async (req, res) => {
@@ -13,15 +12,47 @@ module.exports = {
       if (error) {
         return response(res, error.message, {}, 400, false)
       } else {
-        const data = {
-          ...value,
-          userId: id
-        }
-        const result = await Skills.create(data)
-        if (result) {
-          return response(res, 'Skills created', { data: result })
+        const find = await Skills.findOne({
+          where: {
+            name: value.name
+          }
+        })
+        if (find) {
+          const data = await skillUser.findOne({
+            where: {
+              [Op.and]: [{ skillId: find.id }, { userId: id }]
+            }
+          })
+          if (data) {
+            return response(res, 'success create skills', { data })
+          } else {
+            const send = {
+              skillId: find.id,
+              userId: id
+            }
+            const result = await skillUser.create(send)
+            if (result) {
+              return response(res, 'Skills created', { data: result, find })
+            } else {
+              return response(res, 'Failed to create', {}, 400, false)
+            }
+          }
         } else {
-          return response(res, 'Failed to create', {}, 400, false)
+          const results = await Skills.create(value)
+          if (results) {
+            const send = {
+              skillId: results.id,
+              userId: id
+            }
+            const create = await skillUser.create(send)
+            if (create) {
+              return response(res, 'Skills created', { data: create, find })
+            } else {
+              return response(res, 'Failed to create', {}, 400, false)
+            }
+          } else {
+            return response(res, 'Failed to create', {}, 400, false)
+          }
         }
       }
     } catch (e) {
@@ -36,14 +67,44 @@ module.exports = {
       if (error) {
         return response(res, error.message, {}, 400, false)
       } else {
-        const find = await Skills.findOne({
-          where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+        const result = await Skills.findOne({
+          where: {
+            name: value.name
+          }
         })
-        if (find) {
-          find.update(value)
-          return response(res, 'update skills successfully', { data: value })
+        if (result) {
+          const find = await skillUser.findOne({
+            where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+          })
+          if (find) {
+            const send = {
+              skillId: result.id,
+              userId: idUser
+            }
+            find.update(send)
+            return response(res, 'update skills successfully', { data: value })
+          } else {
+            return response(res, 'Failed to update', {}, 400, false)
+          }
         } else {
-          return response(res, 'update skill failed', {}, 400, false)
+          const results = await Skills.create(value)
+          if (results) {
+            const find = await skillUser.findOne({
+              where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+            })
+            if (find) {
+              const send = {
+                skillId: results.id,
+                userId: idUser
+              }
+              find.update(send)
+              return response(res, 'update skills successfully', { data: value })
+            } else {
+              return response(res, 'Failed to update', {}, 400, false)
+            }
+          } else {
+            return response(res, 'Failed to update', {}, 400, false)
+          }
         }
       }
     } catch (e) {
@@ -54,7 +115,7 @@ module.exports = {
     try {
       const idUser = req.user.id
       const { id } = req.params
-      const find = await Skills.findOne({
+      const find = await skillUser.findOne({
         where: { [Op.and]: [{ userId: idUser }, { id: id }] }
       })
       if (find) {
@@ -71,17 +132,13 @@ module.exports = {
     try {
       let { limit, page, search } = req.query
       let searchValue = ''
-      let searchKey = ''
-      let find = {}
       if (typeof search === 'object') {
-        searchKey = Object.keys(search)[0]
         searchValue = Object.values(search)[0]
       } else {
-        searchKey = 'name'
         searchValue = search || ''
       }
       if (!limit) {
-        limit = 7
+        limit = 5
       } else {
         limit = parseInt(limit)
       }
@@ -90,41 +147,20 @@ module.exports = {
       } else {
         page = parseInt(page)
       }
-      if (searchKey === 'name') {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
-      } else {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
-      }
       const result = await Skills.findAndCountAll({
-        where: find,
-        group: ['name'],
+        where: {
+          name: { [Op.like]: `%${searchValue}%` }
+        },
+        include: [
+          { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
+        ],
         order: [['name', 'ASC']],
         limit: limit,
         offset: (page - 1) * limit
       })
-      const data = result.count
-      const counting = result.count.map(item => {
-        return item.count
-      })
-      const counted = counting.reduce((total, value) => total + value, 0)
-      const pageInfo = {
-        count: counted,
-        pages: 0,
-        currentPage: page,
-        limitPerPage: limit,
-        nextLink: null,
-        prevLink: null
-      }
-      pageInfo.pages = Math.ceil(counted / limit)
-      const { pages, currentPage } = pageInfo
-      if (currentPage < pages) {
-        pageInfo.nextLink = `http://${APP_URL}:${APP_PORT}/job-seeker/skill/get?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
-      }
-      if (currentPage > 1) {
-        pageInfo.prevLink = `http://${APP_URL}:${APP_PORT}/job-seeker/skill/get?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
-      }
+      const pageInfo = pagination('/job-seeker/skill/get', req.query, page, limit, result.count)
       if (result) {
-        return response(res, 'list skills', { result: data, pageInfo })
+        return response(res, 'list skills', { result, pageInfo })
       } else {
         return response(res, 'fail to get skills', {}, 400, false)
       }

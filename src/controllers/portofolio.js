@@ -1,4 +1,4 @@
-const { Portfolio, ImagePortfolio } = require('../models')
+const { Portfolio, ImagePortfolio, UserDetails, ImageProfile } = require('../models')
 const response = require('../helpers/response')
 const { portofolio, updatePortofolio } = require('../helpers/validation')
 const uploadHelper = require('../helpers/upload')
@@ -6,35 +6,8 @@ const multer = require('multer')
 const { Op } = require('sequelize')
 
 module.exports = {
-  postPortofolio: async (req, res) => {
-    try {
-      const id = req.user.id
-      const { value, error } = portofolio.validate(req.body)
-      if (error) {
-        return response(res, error.message, {}, 400, false)
-      } else {
-        const data = {
-          ...value,
-          userId: id
-        }
-        const result = await Portfolio.create(data)
-        if (result) {
-          const results = await ImagePortfolio.create({ portFolioId: result.id })
-          if (results) {
-            return response(res, 'success create portofolio', { result })
-          } else {
-            return response(res, 'fail to create portofolio', {}, 400, false)
-          }
-        } else {
-          return response(res, 'fail to create portofolio', {}, 400, false)
-        }
-      }
-    } catch (e) {
-      return response(res, e.message, {}, 500, false)
-    }
-  },
   uploadPicturePortofolio: (req, res) => {
-    const { id } = req.params
+    const id = req.user.id
     uploadHelper(req, res, async function (err) {
       try {
         if (err instanceof multer.MulterError) {
@@ -54,19 +27,29 @@ module.exports = {
             image = image.slice(0, image.length - 2)
           }
         }
-        const data = {
-          picture: image
-        }
-        const find = await ImagePortfolio.findOne({ where: { portFolioId: id } })
-        if (find) {
-          const results = await find.update(data)
-          if (results) {
-            return response(res, 'upload image succesfully', { picture: image })
-          } else {
-            return response(res, 'upload image failed', {}, 400, false)
-          }
+        const { value, error } = portofolio.validate(req.body)
+        if (error) {
+          return response(res, error.message, {}, 400, false)
         } else {
-          return response(res, 'upload image failed', {}, 400, false)
+          const data = {
+            ...value,
+            userId: id
+          }
+          const result = await Portfolio.create(data)
+          if (result) {
+            const pict = {
+              picture: image,
+              portFolioId: result.id
+            }
+            const results = await ImagePortfolio.create(pict)
+            if (results) {
+              return response(res, 'success create portofolio', { result, results })
+            } else {
+              return response(res, 'fail to create portofolio', {}, 400, false)
+            }
+          } else {
+            return response(res, 'fail to create portofolio', {}, 400, false)
+          }
         }
       } catch (e) {
         return response(res, e.message, {}, 500, false)
@@ -76,13 +59,24 @@ module.exports = {
   getAllPortofolio: async (req, res) => {
     const id = req.user.id
     try {
-      const result = await Portfolio.findAndCountAll({
-        where: { userId: id }
+      const user = await UserDetails.findOne({
+        where: {
+          userId: id
+        },
+        include: [{ model: ImageProfile, as: 'profileAvatar' }]
       })
-      if (result) {
-        return response(res, 'success get portofolio', { result })
-      } else {
-        return response(res, 'fail to get portofolio', {}, 400, false)
+      if (user) {
+        const result = await Portfolio.findAndCountAll({
+          where: { userId: id },
+          include: [
+            { model: ImagePortfolio, as: 'picture' }
+          ]
+        })
+        if (result) {
+          return response(res, 'success get portofolio', { user, result })
+        } else {
+          return response(res, 'fail to get portofolio', {}, 400, false)
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -119,7 +113,11 @@ module.exports = {
     const { id } = req.params
     try {
       const find = await Portfolio.findOne({
-        where: { [Op.and]: [{ userId: idUser }, { id: id }] }
+        where: { [Op.and]: [{ userId: idUser }, { id: id }] },
+        include: [
+          { model: ImagePortfolio, as: 'picture' },
+          { model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }
+        ]
       })
       if (find) {
         return response(res, 'success get portofolio', { find })
