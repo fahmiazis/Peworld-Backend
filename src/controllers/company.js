@@ -184,7 +184,7 @@ module.exports = {
         const result = await UserDetails.findAndCountAll({
           include: [
             { model: ImageProfile, as: 'profileAvatar' },
-            { model: skillUser, as: 'skills', limit: 3, include: [{ model: skillUser, as: 'skill' }] }
+            { model: skillUser, as: 'skills', include: [{ model: skillUser, as: 'skill' }] }
           ],
           where: {
             [Op.or]: [
@@ -210,7 +210,7 @@ module.exports = {
         const result = await UserDetails.findAndCountAll({
           include: [
             { model: ImageProfile, as: 'profileAvatar' },
-            { model: skillUser, as: 'skills', limit: 3, include: [{ model: Skills, as: 'skill' }] }
+            { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
           ],
           where: {
             [Op.or]: [

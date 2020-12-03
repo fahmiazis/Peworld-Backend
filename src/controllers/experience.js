@@ -1,4 +1,4 @@
-const { Experience } = require('../models')
+const { Experience, ImageProfile, UserDetails } = require('../models')
 const response = require('../helpers/response')
 const { experienceSeeker } = require('../helpers/validation')
 
@@ -26,12 +26,23 @@ module.exports = {
     }
   },
   getAll: async (req, res) => {
+    const id = req.user.id
     try {
-      const result = await Experience.findAll()
-      if (result) {
-        return response(res, 'Data experience job-seeker', { result })
-      } else {
-        return response(res, 'No data found', {})
+      const user = await UserDetails.findOne({
+        where: {
+          userId: id
+        },
+        include: [{ model: ImageProfile, as: 'profileAvatar' }]
+      })
+      if (user) {
+        const result = await Experience.findAndCountAll({
+          where: { userId: id }
+        })
+        if (result) {
+          return response(res, 'Data experience job-seeker', { result })
+        } else {
+          return response(res, 'No data found', {})
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
