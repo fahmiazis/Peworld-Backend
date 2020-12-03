@@ -15,7 +15,7 @@ module.exports = {
     name: joi.string().required(),
     email: joi.string().required(),
     company: joi.string().required(),
-    jobTitle: joi.string().required(),
+    jobDesk: joi.string().required(),
     phone: joi.string().required(),
     password: joi.string().required().min(8),
     confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))

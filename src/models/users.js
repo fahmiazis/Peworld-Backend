@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       // define association here
       Users.hasOne(models.UserDetails, {
-        foreignKey: 'userId'
+        foreignKey: 'userId',
+        // as: 'recruiter'
       })
       Users.hasOne(models.Company, {
         foreignKey: 'userId'

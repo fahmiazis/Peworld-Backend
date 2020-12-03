@@ -88,7 +88,6 @@ module.exports = {
                   userId: createUser.id
                 }
                 await UserDetails.create(userData)
-
                 const companyData = {
                   name: company,
                   userId: createUser.id
