@@ -44,7 +44,7 @@ module.exports = {
           const send = await Message.create(data)
 
           if (send) {
-            io.emit(recipient, { sender, message: content })
+            io.emit(recipient.toString(), { sender, message: content })
             return response(res, 'Send message successfully', { data: send }, 201)
           } else {
             return response(res, 'Failed to send message', {}, 400, false)
