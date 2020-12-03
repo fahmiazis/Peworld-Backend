@@ -5,6 +5,9 @@ const cors = require('cors')
 const response = require('./helpers/response')
 
 const app = express()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {})
+module.exports = io
 const { APP_PORT } = process.env
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -30,6 +33,6 @@ app.get('*', (req, res) => {
   response(res, 'Error route not found', {}, 404, false)
 })
 
-app.listen(APP_PORT, () => {
+server.listen(APP_PORT, () => {
   console.log(`App is running on port ${APP_PORT}`)
 })

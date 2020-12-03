@@ -1,10 +1,11 @@
-const { Users, Message } = require('../models')
+const { Users, Message, UserDetails, Company, ImageProfile } = require('../models')
 
 const { Op } = require('sequelize')
 
 const response = require('../helpers/response')
 const { message } = require('../helpers/validation')
 const { pagination } = require('../helpers/pagination')
+const io = require('../App')
 
 module.exports = {
   sendMsg: async (req, res) => {
@@ -43,6 +44,7 @@ module.exports = {
           const send = await Message.create(data)
 
           if (send) {
+            io.emit(recipient, { sender, message: content })
             return response(res, 'Send message successfully', { data: send }, 201)
           } else {
             return response(res, 'Failed to send message', {}, 400, false)
@@ -76,8 +78,68 @@ module.exports = {
           isLatest: true
         },
         order: [['createdAt', 'DESC']],
-        limit: pageInfo.limit,
-        offset: pageInfo.offset
+        limit: pageInfo.limitPerPage,
+        offset: (pageInfo.currentPage - 1) * pageInfo.limitPerPage,
+        include: [
+          {
+            model: Users,
+            as: 'senderInfo',
+            attributes: ['id'],
+            include: [
+              {
+                model: UserDetails,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attributes: ['id', 'avatar'],
+                    as: 'profileAvatar'
+                  }
+                ]
+              },
+              {
+                model: Company,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attribute: ['id', 'avatar'],
+                    as: 'companyAvatar'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            model: Users,
+            as: 'recipientInfo',
+            attributes: ['id'],
+            include: [
+              {
+                model: UserDetails,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attributes: ['id', 'avatar'],
+                    as: 'profileAvatar'
+                  }
+                ]
+              },
+              {
+                model: Company,
+                attributes: ['name'],
+                include: [
+                  {
+                    model: ImageProfile,
+                    attribute: ['id', 'avatar'],
+                    as: 'companyAvatar'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       })
 
       return response(res, 'List of message', { data: results, pageInfo })
@@ -123,8 +185,8 @@ module.exports = {
             }
           },
           order: [['createdAt', 'DESC']],
-          limit: pageInfo.limit,
-          offset: pageInfo.offset
+          limit: pageInfo.limitPerPage,
+          offset: (pageInfo.currentPage - 1) * pageInfo.limitPerPage
         })
 
         if (results) {

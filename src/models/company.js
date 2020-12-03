@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'companyAvatar'
       })
+
+      // Company.belongsTo(models.Message, {
+      //   foreignKey: 'userId',
+      //   as: 'company'
+      // })
     }
   };
   Company.init({
