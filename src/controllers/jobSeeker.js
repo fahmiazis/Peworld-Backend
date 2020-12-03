@@ -158,9 +158,10 @@ module.exports = {
   },
   listCompany: async (req, res) => {
     try {
-      let { limit, page, search } = req.query
+      let { limit, page, search, sort } = req.query
       let searchValue = ''
       let searchKey = ''
+      let sortValue = ''
       let find = {}
       if (typeof search === 'object') {
         searchKey = Object.keys(search)[0]
@@ -168,6 +169,11 @@ module.exports = {
       } else {
         searchKey = 'name'
         searchValue = search || ''
+      }
+      if (typeof sort === 'object') {
+        sortValue = Object.values(sort)[0]
+      } else {
+        sortValue = sort || 'createdAt'
       }
       if (!limit) {
         limit = 5
@@ -191,7 +197,7 @@ module.exports = {
           as: 'companyAvatar'
         },
         where: find,
-        order: [['createdAt', 'ASC']],
+        order: [[`${sortValue}`, 'ASC']],
         limit: limit,
         offset: (page - 1) * limit
       })

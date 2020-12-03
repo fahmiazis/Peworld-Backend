@@ -76,11 +76,5 @@ module.exports = {
   updateSeeker: joi.object({
     email: joi.string(),
     password: joi.string()
-  }),
-  experienceSeeker: joi.object({
-    jobDesk: joi.string().required(),
-    company: joi.string().required(),
-    year: joi.number().integer().min(1900).required(),
-    description: joi.string().required()
   })
 }
