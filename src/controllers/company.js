@@ -27,16 +27,16 @@ module.exports = {
         where: { id: id },
         attributes: ['id', 'email', 'roleId'],
         include: [{
-          model: UserDetails,
+          model: Company,
           // as: 'recruiter'
         },
         {
-          model: Company,
-          include: {
+      //    model: Company,
+      //    include: {
             model: ImageProfile,
             attribute: ['id', 'avatar'],
             as: 'companyAvatar'
-          }
+      //    }
         }
         ]
       })
