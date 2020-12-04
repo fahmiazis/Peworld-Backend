@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
       Users.hasOne(models.Company, {
         foreignKey: 'userId'
       })
+      
+      Users.hasOne(models.ImageProfile, {
+        foreignKey: 'userId',
+        as: 'companyAvatar'
+      })
     }
   };
   Users.init({
