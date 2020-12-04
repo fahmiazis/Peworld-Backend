@@ -27,16 +27,16 @@ module.exports = {
         where: { id: id },
         attributes: ['id', 'email', 'roleId'],
         include: [{
-          model: Company,
+          model: Company
           // as: 'recruiter'
         },
         {
-      //    model: Company,
-      //    include: {
-            model: ImageProfile,
-            attribute: ['id', 'avatar'],
-            as: 'companyAvatar'
-      //    }
+          //    model: Company,
+          //    include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+          //    }
         }
         ]
       })
@@ -332,7 +332,7 @@ module.exports = {
           {
             model: UserDetails,
             include: [
-           //   { model: ImageProfile, as: 'profileAvatar' },
+              //   { model: ImageProfile, as: 'profileAvatar' },
               { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
               { model: Experience, as: 'experience' },
               { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
