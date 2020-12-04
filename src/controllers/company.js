@@ -332,12 +332,13 @@ module.exports = {
           {
             model: UserDetails,
             include: [
-              { model: ImageProfile, as: 'profileAvatar' },
+           //   { model: ImageProfile, as: 'profileAvatar' },
               { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
               { model: Experience, as: 'experience' },
               { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
             ]
-          }
+          },
+          { model: ImageProfile, as: 'profileAvatar' }
         ],
         where: { id: id, roleId: { [Op.not]: 2 } }
       })
