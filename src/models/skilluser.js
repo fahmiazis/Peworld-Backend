@@ -16,11 +16,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'skill'
       })
 
+      // skillUser.belongsTo(models.UserDetails, {
+      //   foreignKey: 'userId',
+      //   // as: 'user'
+      // })
       skillUser.belongsTo(models.UserDetails, {
-        foreignKey: 'userId',
-        // as: 'user'
-      })
-      skillUser.belongsTo(models.Users, {
         foreignKey: 'userId',
         // as: 'user'
       })

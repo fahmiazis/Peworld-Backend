@@ -138,6 +138,15 @@ module.exports = {
       if (find) {
         const result = await find.destroy()
         if (result) {
+          const pict = await ImagePortfolio.findOne({
+            where: { portFolioId: id }
+          })
+          if (pict) {
+            const result = pict.destroy()
+            if (result) {
+              return response(res, 'delete portofolio succesfully')
+            }
+          }
           return response(res, 'delete portofolio succesfully')
         } else {
           return response(res, 'delete portofolio failed', {}, 400, false)
@@ -148,5 +157,39 @@ module.exports = {
     } catch (e) {
       return response(res, e.message, {}, 500, false)
     }
+  },
+  updatePortofolioPict: async (req, res) => {
+    const { id } = req.params
+    uploadHelper(req, res, async function (err) {
+      try {
+        if (err instanceof multer.MulterError) {
+          if (err.code === 'LIMIT_UNEXPECTED_FILE' && req.files.length === 0) {
+            console.log(err.code === 'LIMIT_UNEXPECTED_FILE' && req.files.length > 0)
+            return response(res, 'fieldname doesnt match', {}, 500, false)
+          }
+          return response(res, err.message, {}, 500, false)
+        } else if (err) {
+          return response(res, err.message, {}, 401, false)
+        }
+        let image = ''
+        for (let x = 0; x < req.files.length; x++) {
+          const picture = `uploads/${req.files[x].filename}`
+          image += picture + ', '
+          if (x === req.files.length - 1) {
+            image = image.slice(0, image.length - 2)
+          }
+        }
+
+        const pict = { picture: image }
+        const results = await ImagePortfolio.update(pict, { where: { portFolioId: id } })
+        if (results) {
+          return response(res, 'success update portofolio', { results: pict })
+        } else {
+          return response(res, 'fail to update portofolio', {}, 400, false)
+        }
+      } catch (e) {
+        return response(res, e.message, {}, 500, false)
+      }
+    })
   }
 }

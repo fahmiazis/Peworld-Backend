@@ -71,7 +71,7 @@ module.exports = {
           if (findEmail.length) {
             return response(res, 'Email already used', {}, 400, false)
           } else {
-            const findPhone = await Company.findAll({ where: { phone } })
+            const findPhone = await UserDetails.findAll({ where: { phone } })
 
             if (findPhone.length) {
               return response(res, 'Phone already used', {}, 400, false)
@@ -83,10 +83,10 @@ module.exports = {
                 const userData = {
                   name,
                   workplace: company,
-                  jobTitle,
                   phone,
                   userId: createUser.id,
-                  roleId: 2
+                  roleId: 2,
+                  jobTitle
                 }
                 await UserDetails.create(userData)
                 const companyData = {
