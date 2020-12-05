@@ -57,7 +57,13 @@ module.exports = (sequelize, DataTypes) => {
         msg: 'Already exist'
       }
     },
-    userId: DataTypes.INTEGER
+    userId: DataTypes.INTEGER,
+    address: {
+      type: DataTypes.STRING
+    },
+    city: {
+      type: DataTypes.STRING
+    }
   }, {
     sequelize,
     modelName: 'Company'
