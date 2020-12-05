@@ -26,6 +26,8 @@ route.post('/portofolio', portofolio.uploadPicturePortofolio)
 route.get('/portofolio', portofolio.getAllPortofolio)
 route.get('/portofolio/:id', portofolio.getDetailPortofolio)
 route.patch('/portofolio/:id', portofolio.updatePortofolio)
+route.patch('/portofolio/:id', portofolio.updatePortofolio)
+route.patch('/portofolio/picture/:id', portofolio.updatePortofolioPict)
 route.delete('/portofolio/:id', portofolio.deletePortofolio)
 
 route.post('/experience', expRoute.create)
