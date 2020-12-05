@@ -85,13 +85,13 @@ module.exports = {
                   workplace: company,
                   jobTitle,
                   phone,
-                  userId: createUser.id
+                  userId: createUser.id,
+                  roleId: 2
                 }
                 await UserDetails.create(userData)
                 const companyData = {
                   name: company,
-                  userId: createUser.id,
-                  roleId: 2
+                  userId: createUser.id
                 }
                 await Company.create(companyData)
                 return response(
