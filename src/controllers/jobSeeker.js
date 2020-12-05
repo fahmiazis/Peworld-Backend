@@ -163,14 +163,10 @@ module.exports = {
     try {
       let { limit, page, search, sort } = req.query
       let searchValue = ''
-      let searchKey = ''
       let sortValue = ''
-      let find = {}
       if (typeof search === 'object') {
-        searchKey = Object.keys(search)[0]
         searchValue = Object.values(search)[0]
       } else {
-        searchKey = 'name'
         searchValue = search || ''
       }
       if (typeof sort === 'object') {
@@ -188,18 +184,25 @@ module.exports = {
       } else {
         page = parseInt(page)
       }
-      if (searchKey === 'name') {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
-      } else {
-        find = { name: { [Op.like]: `%${searchValue}%` } }
-      }
       const result = await Company.findAndCountAll({
-        include: {
-          model: ImageProfile,
-          attribute: ['id', 'avatar'],
-          as: 'companyAvatar'
+        include: [{
+          model: Users,
+          where: { roleId: 1 },
+          attributes: ['email', 'roleId'],
+          include: [
+            { model: ImageProfile, as: 'companyAvatar' },
+            { model: UserDetails, where: { roleId: 2 } }
+          ]
+        }],
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: `%${searchValue}%` } },
+            { jobDesk: { [Op.like]: `%${searchValue}%` } },
+            { phone: { [Op.like]: `%${searchValue}%` } },
+            { city: { [Op.like]: `%${searchValue}%` } },
+            { address: { [Op.like]: `%${searchValue}%` } }
+          ]
         },
-        where: find,
         order: [[`${sortValue}`, 'ASC']],
         limit: limit,
         offset: (page - 1) * limit
