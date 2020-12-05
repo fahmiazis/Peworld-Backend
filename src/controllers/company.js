@@ -27,16 +27,16 @@ module.exports = {
         where: { id: id },
         attributes: ['id', 'email', 'roleId'],
         include: [{
-          model: Company,
+          model: Company
           // as: 'recruiter'
         },
         {
-      //    model: Company,
-      //    include: {
-            model: ImageProfile,
-            attribute: ['id', 'avatar'],
-            as: 'companyAvatar'
-      //    }
+          //    model: Company,
+          //    include: {
+          model: ImageProfile,
+          attribute: ['id', 'avatar'],
+          as: 'companyAvatar'
+          //    }
         }
         ]
       })
@@ -198,83 +198,25 @@ module.exports = {
         page = parseInt(page)
       }
       if (sortValue === 'domicile') {
-        const result = await Users.findAndCountAll({
-          attributes: ['email', 'roleId'],
-          include: {
-            model: UserDetails,
-            include: [
-              { model: ImageProfile, as: 'profileAvatar' },
-              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
-            ],
-            where: {
-              [Op.or]: [
-                { phone: { [Op.like]: `%${searchValue}%` } },
-                { name: { [Op.like]: `%${searchValue}%` } },
-                { jobTitle: { [Op.like]: `%${searchValue}%` } },
-                { workplace: { [Op.like]: `%${searchValue}%` } },
-                { domicile: { [Op.like]: `%${searchValue}%` } }
-              ],
-              domicile: typeof domicile === 'string'
-            },
-            order: [
-              [{ model: UserDetails }, sortValue, 'DESC']
-            ]
-          },
-          where: {
-            roleId: { [Op.not]: 2 }
-          },
-          limit: limit,
-          offset: (page - 1) * limit
-        })
-        const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
-        if (result.count !== 0) {
-          return response(res, 'list job seeker', { result, pageInfo })
-        } else if (result.count === 0) {
-          const results = await Skills.findAndCountAll({
+        const result = await UserDetails.findAndCountAll({
+          include: [{
+            model: Users,
             attributes: ['email', 'roleId'],
-            where: {
-              [Op.or]: [
-                { name: { [Op.like]: `%${searchValue}%` } }
-              ]
-            },
-            include: [
-              { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
-            ],
-            limit: limit,
-            offset: (page - 1) * limit
-          })
-          const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, results.count)
-          if (results) {
-            return response(res, 'list job seeker', { results, pageInfo })
-          } else {
-            return response(res, 'fail to get job seeker', {}, 400, false)
-          }
-        } else {
-          return response(res, 'fail to get job seeker', {}, 400, false)
-        }
-      } else {
-        const result = await Users.findAndCountAll({
-          attributes: ['email', 'roleId'],
-          include: {
-            model: UserDetails,
             include: [
               { model: ImageProfile, as: 'profileAvatar' },
               { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
-            ],
-            where: {
-              [Op.or]: [
-                { phone: { [Op.like]: `%${searchValue}%` } },
-                { name: { [Op.like]: `%${searchValue}%` } },
-                { jobTitle: { [Op.like]: `%${searchValue}%` } },
-                { workplace: { [Op.like]: `%${searchValue}%` } },
-                { domicile: { [Op.like]: `%${searchValue}%` } }
-              ]
-            },
-            order: [
-              [Users, sortValue, 'DESC']
             ]
-          },
+          }],
+          order: [['domicile', 'ASC']],
           where: {
+            [Op.or]: [
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobTitle: { [Op.like]: `%${searchValue}%` } },
+              { workplace: { [Op.like]: `%${searchValue}%` } },
+              { domicile: { [Op.like]: `%${searchValue}%` } }
+            ],
+            domicile: typeof domicile === 'string',
             roleId: { [Op.not]: 2 }
           },
           limit: limit,
@@ -292,7 +234,100 @@ module.exports = {
             },
             include: [
               {
-                model: skillUser, as: 'users', attributes: ['userId'], include: [{ model: UserDetails, include: [{ model: ImageProfile, as: 'profileAvatar' }, { model: skillUser, attributes: ['userId'], as: 'skills', include: [{ model: Skills, as: 'skill' }] }] }]
+                model: skillUser,
+                as: 'users',
+                attributes: ['userId'],
+                include: [
+                  {
+                    model: UserDetails,
+                    include: [
+                      {
+                        model: Users,
+                        attributes: ['email', 'roleId'],
+                        include: [
+                          { model: ImageProfile, as: 'profileAvatar' },
+                          { model: skillUser, attributes: ['userId'], as: 'skills', include: [{ model: Skills, as: 'skill' }] }]
+                      }
+                    ]
+                  }]
+              }
+            ],
+            limit: limit,
+            offset: (page - 1) * limit
+          })
+          const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, results.count)
+          if (results) {
+            const users = results.rows
+            let hasil = users.map(user => {
+              return user.users
+            })
+            hasil = hasil[0]
+            // console.log(testing)
+            return response(res, 'list job seeker', {
+              result: {
+                count: results.count,
+                rows: hasil
+              },
+              pageInfo
+            })
+          } else {
+            return response(res, 'fail to get job seeker', {}, 400, false)
+          }
+        } else {
+          return response(res, 'fail to get job seeker', {}, 400, false)
+        }
+      } else {
+        const result = await UserDetails.findAndCountAll({
+          include: [{
+            model: Users,
+            attributes: ['email', 'roleId'],
+            include: [
+              { model: ImageProfile, as: 'profileAvatar' },
+              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
+            ]
+          }],
+          where: {
+            [Op.or]: [
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobTitle: { [Op.like]: `%${searchValue}%` } },
+              { workplace: { [Op.like]: `%${searchValue}%` } },
+              { domicile: { [Op.like]: `%${searchValue}%` } }
+            ],
+            roleId: { [Op.not]: 2 }
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
+        if (result.count !== 0) {
+          return response(res, 'list job seeker', { result, pageInfo })
+        } else if (result.count === 0) {
+          const results = await Skills.findAndCountAll({
+            where: {
+              [Op.or]: [
+                { name: { [Op.like]: `%${searchValue}%` } }
+              ]
+            },
+            include: [
+              {
+                model: skillUser,
+                as: 'users',
+                attributes: ['userId'],
+                include: [
+                  {
+                    model: UserDetails,
+                    include: [
+                      {
+                        model: Users,
+                        attributes: ['email', 'roleId'],
+                        include: [
+                          { model: ImageProfile, as: 'profileAvatar' },
+                          { model: skillUser, attributes: ['userId'], as: 'skills', include: [{ model: Skills, as: 'skill' }] }]
+                      }
+                    ]
+                  }]
               }
             ],
             limit: limit,
@@ -321,24 +356,31 @@ module.exports = {
         }
       }
     } catch (e) {
+      // eslint-disable-next-line no-sequences
       return response(res, e.message, {}, 500, false)
+      // console.log(e),
+      // console.log(e.message)
     }
   },
   detailJobSeeker: async (req, res) => {
     try {
       const { id } = req.params
       const result = await Users.findOne({
+        attributes: ['email', 'roleId'],
         include: [
           {
-            model: UserDetails,
-            include: [
-           //   { model: ImageProfile, as: 'profileAvatar' },
-              { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
-              { model: Experience, as: 'experience' },
-              { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
-            ]
+            model: UserDetails
+            // include: [
+            //   { model: ImageProfile, as: 'profileAvatar' },
+            // { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
+            // { model: Experience, as: 'experience' },
+            // { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] }
+            // ]
           },
-          { model: ImageProfile, as: 'profileAvatar' }
+          { model: ImageProfile, as: 'profileAvatar' },
+          { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] },
+          { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
+          { model: Experience, as: 'experience' }
         ],
         where: { id: id, roleId: { [Op.not]: 2 } }
       })

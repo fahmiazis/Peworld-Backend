@@ -40,8 +40,8 @@ module.exports = {
 
               const createUser = await Users.create(users)
               if (createUser) {
-                const details = { name, phone, userId: createUser.id }
-
+                const details = { name, phone, userId: createUser.id, roleId: 1 }
+                console.log(details.roleId)
                 const createDetails = await UserDetails.create(details)
                 if (createDetails) {
                   return response(
@@ -90,7 +90,8 @@ module.exports = {
                 await UserDetails.create(userData)
                 const companyData = {
                   name: company,
-                  userId: createUser.id
+                  userId: createUser.id,
+                  roleId: 2
                 }
                 await Company.create(companyData)
                 return response(

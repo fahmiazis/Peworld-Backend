@@ -1,7 +1,7 @@
-const { UserDetails, Company, Users, ImageProfile } = require('../models')
+const { UserDetails, Company, Users, ImageProfile, skillUser, Portfolio, Experience, Skills, ImagePortfolio } = require('../models')
 const { Op } = require('sequelize')
 const qs = require('querystring')
-const { APP_URL, APP_PORT } = process.env
+const { APP_URL } = process.env
 const response = require('../helpers/response')
 const { updateDetailSeeker, updateUser } = require('../helpers/validation')
 const bcrypt = require('bcrypt')
@@ -13,16 +13,19 @@ module.exports = {
   profile: async (req, res) => {
     try {
       const { id } = req.user
-      const result = await UserDetails.findOne({
+      const result = await Users.findOne({
+        attributes: ['id', 'email', 'roleId'],
         include: [{
-          model: Users,
-          attributes: ['id', 'email', 'roleId']
+          model: UserDetails
         }, {
           model: ImageProfile,
-          attributes: ['id', 'avatar'],
+          attributes: ['avatar'],
           as: 'profileAvatar'
-        }],
-        where: { userId: id }
+        },
+        { model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }] },
+        { model: Portfolio, as: 'portofolio', include: [{ model: ImagePortfolio, as: 'picture' }] },
+        { model: Experience, as: 'experience' }],
+        where: { id: id }
       })
       if (result) {
         return response(res, `Profile of user with id ${id}`, { result })
@@ -212,10 +215,10 @@ module.exports = {
       pageInfo.pages = Math.ceil(result.count / limit)
       const { pages, currentPage } = pageInfo
       if (currentPage < pages) {
-        pageInfo.nextLink = `http://${APP_URL}:${APP_PORT}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
+        pageInfo.nextLink = `http://${APP_URL}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
       }
       if (currentPage > 1) {
-        pageInfo.prevLink = `http://${APP_URL}:${APP_PORT}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
+        pageInfo.prevLink = `http://${APP_URL}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
       }
       if (result) {
         return response(res, 'list companies', { result, pageInfo })
