@@ -1,4 +1,4 @@
-const { Skills, skillUser, UserDetails, ImageProfile } = require('../models')
+const { Skills, skillUser } = require('../models')
 const response = require('../helpers/response')
 const { role } = require('../helpers/validation')
 const { Op } = require('sequelize')
@@ -151,9 +151,6 @@ module.exports = {
         where: {
           name: { [Op.like]: `%${searchValue}%` }
         },
-        include: [
-          { model: skillUser, as: 'users', include: [{ model: UserDetails, as: 'user', include: [{ model: ImageProfile, as: 'profileAvatar' }] }] }
-        ],
         order: [['name', 'ASC']],
         limit: limit,
         offset: (page - 1) * limit
