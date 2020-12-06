@@ -53,7 +53,9 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     password: DataTypes.STRING,
-    roleId: DataTypes.INTEGER
+    roleId: DataTypes.INTEGER,
+    resetCode: DataTypes.STRING,
+    deviceToken: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Users'
