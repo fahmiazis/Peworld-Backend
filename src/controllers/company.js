@@ -199,7 +199,6 @@ module.exports = {
         }, {
           model: skillUser, as: 'skills', include: [{ model: Skills, as: 'skill' }]
         }],
-        order: [['domicile', 'ASC']],
         where: {
           [Op.or]: [
             { phone: { [Op.like]: `%${searchValue}%` } },
@@ -209,14 +208,15 @@ module.exports = {
             { domicile: { [Op.like]: `%${searchValue}%` } }
           ]
         },
+        order: [[sortValue, 'ASC']],
         limit: limit,
         offset: (page - 1) * limit
       })
       const pageInfo = pagination('/company/job-seeker/all', req.query, page, limit, result.count)
       if (result.count !== 0) {
         return response(res, 'list job seeker', { result, pageInfo })
-      } else if (result.count === 0) {
-        return searchSkill(req, res, searchValue, limit, page)
+      } else {
+        return response(res, 'fail to get job seeker', {}, 400, false)
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
