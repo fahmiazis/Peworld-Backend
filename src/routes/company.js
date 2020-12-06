@@ -2,7 +2,8 @@ const route = require('express').Router()
 const company = require('../controllers/company')
 const messageController = require('../controllers/message')
 
-route.get('/job-seeker/all', company.listJobSeekers)
+route.get('/job-seeker/all', company.listJobSeekers) // list jobseekers
+route.get('/job-seeker/search', company.searchJobSeekers) // list jobseeker with advance function
 route.get('/job-seeker/:id', company.detailJobSeeker)
 
 route.get('/profile/get', company.profile)
