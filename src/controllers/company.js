@@ -13,17 +13,6 @@ module.exports = {
   profile: async (req, res) => {
     try {
       const { id } = req.user
-      // const result = await Company.findOne({
-      //   where: { userId: id },
-      //   include: [{
-      //     model: Users,
-      //     attributes: ['id', 'email', 'roleId']
-      //   }, {
-      //     model: ImageProfile,
-      //     attribute: ['id', 'avatar'],
-      //     as: 'companyAvatar'
-      //   }]
-      // })
       const result = await Users.findOne({
         where: { id: id },
         attributes: ['id', 'email', 'roleId'],

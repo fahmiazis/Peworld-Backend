@@ -78,5 +78,14 @@ module.exports = {
   updateSeeker: joi.object({
     email: joi.string(),
     password: joi.string()
+  }),
+  resetCode: joi.object({
+    email: joi.string()
+  }),
+  resetPassword: joi.object({
+    email: joi.string(),
+    resetCode: joi.string(),
+    password: joi.string().required().min(8),
+    confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
   })
 }

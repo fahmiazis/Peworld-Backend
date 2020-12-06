@@ -191,7 +191,6 @@ module.exports = {
       return response(res, e.message, {}, 500, false)
     }
   },
-  resetPassword: async (req, res) => {},
   refreshToken: async (req, res) => {
     try {
       const { refreshToken } = req.body
