@@ -1,13 +1,12 @@
 const { UserDetails, Company, Users, ImageProfile, skillUser, Portfolio, Experience, Skills, ImagePortfolio } = require('../models')
 const { Op } = require('sequelize')
-const qs = require('querystring')
-const { APP_URL } = process.env
 const response = require('../helpers/response')
 const { updateDetailSeeker, updateUser } = require('../helpers/validation')
 const bcrypt = require('bcrypt')
 const multer = require('multer')
 const singleUpload = require('../helpers/singleUpload')
 const fs = require('fs')
+const { pagination } = require('../helpers/pagination')
 
 module.exports = {
   profile: async (req, res) => {
@@ -184,49 +183,98 @@ module.exports = {
       } else {
         page = parseInt(page)
       }
-      const result = await Company.findAndCountAll({
-        include: [{
-          model: Users,
-          where: { roleId: 1 },
-          attributes: ['email', 'roleId'],
-          include: [
-            { model: ImageProfile, as: 'companyAvatar' },
-            { model: UserDetails, where: { roleId: 2 } }
-          ]
-        }],
-        where: {
-          [Op.or]: [
-            { name: { [Op.like]: `%${searchValue}%` } },
-            { jobDesk: { [Op.like]: `%${searchValue}%` } },
-            { phone: { [Op.like]: `%${searchValue}%` } },
-            { city: { [Op.like]: `%${searchValue}%` } },
-            { address: { [Op.like]: `%${searchValue}%` } }
-          ]
-        },
-        order: [[`${sortValue}`, 'ASC']],
-        limit: limit,
-        offset: (page - 1) * limit
-      })
-      const pageInfo = {
-        count: result.count,
-        pages: 0,
-        currentPage: page,
-        limitPerPage: limit,
-        nextLink: null,
-        prevLink: null
-      }
-      pageInfo.pages = Math.ceil(result.count / limit)
-      const { pages, currentPage } = pageInfo
-      if (currentPage < pages) {
-        pageInfo.nextLink = `http://${APP_URL}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page + 1 } })}`
-      }
-      if (currentPage > 1) {
-        pageInfo.prevLink = `http://${APP_URL}/job-seeker/company/all?${qs.stringify({ ...req.query, ...{ page: page - 1 } })}`
-      }
-      if (result) {
-        return response(res, 'list companies', { result, pageInfo })
+      if (sortValue === 'jobDesk') {
+        const result = await Company.findAndCountAll({
+          include: [{
+            model: Users,
+            where: { roleId: 2 },
+            attributes: ['email', 'roleId'],
+            include: [
+              { model: ImageProfile, as: 'companyAvatar' },
+              { model: UserDetails, where: { roleId: 2 } }
+            ]
+          }],
+          where: {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobDesk: { [Op.like]: `%${searchValue}%` } },
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { city: { [Op.like]: `%${searchValue}%` } },
+              { address: { [Op.like]: `%${searchValue}%` } }
+            ],
+            jobDesk: { [Op.not]: null }
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/job-seeker/company/all', req.query, page, limit, result.count)
+        if (result) {
+          return response(res, 'list companies', { result, pageInfo })
+        } else {
+          return response(res, 'fail to get companies', {}, 400, false)
+        }
+      } else if (sortValue === 'city') {
+        const result = await Company.findAndCountAll({
+          include: [{
+            model: Users,
+            where: { roleId: 2 },
+            attributes: ['email', 'roleId'],
+            include: [
+              { model: ImageProfile, as: 'companyAvatar' },
+              { model: UserDetails, where: { roleId: 2 } }
+            ]
+          }],
+          where: {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobDesk: { [Op.like]: `%${searchValue}%` } },
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { city: { [Op.like]: `%${searchValue}%` } },
+              { address: { [Op.like]: `%${searchValue}%` } }
+            ],
+            city: { [Op.not]: null }
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/job-seeker/company/all', req.query, page, limit, result.count)
+        if (result) {
+          return response(res, 'list companies', { result, pageInfo })
+        } else {
+          return response(res, 'fail to get companies', {}, 400, false)
+        }
       } else {
-        return response(res, 'fail to get companies', {}, 400, false)
+        const result = await Company.findAndCountAll({
+          include: [{
+            model: Users,
+            where: { roleId: 2 },
+            attributes: ['email', 'roleId'],
+            include: [
+              { model: ImageProfile, as: 'companyAvatar' },
+              { model: UserDetails, where: { roleId: 2 } }
+            ]
+          }],
+          where: {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchValue}%` } },
+              { jobDesk: { [Op.like]: `%${searchValue}%` } },
+              { phone: { [Op.like]: `%${searchValue}%` } },
+              { city: { [Op.like]: `%${searchValue}%` } },
+              { address: { [Op.like]: `%${searchValue}%` } }
+            ]
+          },
+          order: [[`${sortValue}`, 'ASC']],
+          limit: limit,
+          offset: (page - 1) * limit
+        })
+        const pageInfo = pagination('/job-seeker/company/all', req.query, page, limit, result.count)
+        if (result) {
+          return response(res, 'list companies', { result, pageInfo })
+        } else {
+          return response(res, 'fail to get companies', {}, 400, false)
+        }
       }
     } catch (e) {
       return response(res, e.message, {}, 500, false)
@@ -236,11 +284,15 @@ module.exports = {
     try {
       const { id } = req.params
       const result = await Company.findOne({
-        include: {
-          model: ImageProfile,
-          attribute: ['id', 'avatar'],
-          as: 'companyAvatar'
-        },
+        include: [{
+          model: Users,
+          where: { roleId: 2 },
+          attributes: ['email', 'roleId'],
+          include: [
+            { model: ImageProfile, as: 'companyAvatar' },
+            { model: UserDetails, where: { roleId: 2 } }
+          ]
+        }],
         where: { id: id }
       })
       if (result) {
