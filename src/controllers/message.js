@@ -50,7 +50,9 @@ module.exports = {
             const senderResult = await UserDetails.findOne({ where: { userId: sender } })
             const { name } = senderResult.dataValues
             console.log(senderResult)
-            messaging(deviceToken, name, content)
+            if (deviceToken.length > 0) {
+              messaging(deviceToken, name, content)
+            }
             io.emit(recipient.toString(), { sender, message: content })
             return response(res, 'Send message successfully', { data: send }, 201)
           } else {
