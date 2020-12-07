@@ -1,8 +1,8 @@
 const sendMail = require('nodemailer')
 
 const {
-  USER,
-  PASS
+  GMAIL,
+  GMAILPASS
 } = process.env
 
 module.exports = {
@@ -10,13 +10,13 @@ module.exports = {
     const connection = sendMail.createTransport({
       service: 'gmail',
       auth: {
-        user: USER,
-        pass: PASS
+        user: GMAIL,
+        pass: GMAILPASS
       }
     })
-
+    console.log(GMAIL)
     const options = {
-      from: USER,
+      from: GMAIL,
       to: data[0],
       subject: 'Reset Password',
       html: `<h1>Hello ${data[0]} this is your reset code</h1>
