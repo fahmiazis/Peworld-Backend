@@ -85,7 +85,11 @@ module.exports = {
   resetPassword: joi.object({
     email: joi.string(),
     resetCode: joi.string(),
-    password: joi.string().required().min(8),
-    confirmPassword: joi.string().required().min(8).equal(joi.ref('password'))
+    newPassword: joi.string().required().min(8),
+    confirmNewPassword: joi.string().required().min(8).equal(joi.ref('newPassword'))
+  }),
+  matchReset: joi.object({
+    email: joi.string(),
+    resetCode: joi.string()
   })
 }

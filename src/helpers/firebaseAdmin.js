@@ -1,9 +1,9 @@
 const admin = require('firebase-admin')
 
-const serviceAccount = require('../config/dchat-e3451-firebase-adminsdk-5ahco-a5d5f2c406.json')
+const serviceAccount = require('../config/hiredjobapp-1c2ff-firebase-adminsdk-9q4rj-d6bdba743b.json')
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://dchat-e3451.firebaseio.com'
+  databaseURL: 'firebase-adminsdk-9q4rj@hiredjobapp-1c2ff.iam.gserviceaccount.com'
 })
 
 const messaging = (deviceToken, username, content) => {
@@ -13,7 +13,6 @@ const messaging = (deviceToken, username, content) => {
       title: `You got message from ${username}`,
       body: content.length > 20 ? content.slice(0, 20).concat('...') : content
     },
-    priority: 'high'
   }).then((response) => {
     console.log(`Successfully sent notification: ${response}`)
   }).catch((err) => {

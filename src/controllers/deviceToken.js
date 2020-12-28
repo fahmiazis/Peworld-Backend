@@ -1,4 +1,4 @@
-const response = require('../helpers/responseStandard')
+const response = require('../helpers/response')
 const { Users } = require('../models')
 const joi = require('joi')
 

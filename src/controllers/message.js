@@ -6,6 +6,7 @@ const response = require('../helpers/response')
 const { message } = require('../helpers/validation')
 const { pagination } = require('../helpers/pagination')
 const io = require('../App')
+const messaging = require('../helpers/firebaseAdmin')
 
 module.exports = {
   sendMsg: async (req, res) => {
@@ -44,6 +45,14 @@ module.exports = {
           const send = await Message.create(data)
 
           if (send) {
+            const recipientResult = await Users.findByPk(recipient)
+            const { deviceToken } = recipientResult.dataValues
+            const senderResult = await UserDetails.findOne({ where: { userId: sender } })
+            const { name } = senderResult.dataValues
+            console.log(senderResult)
+            if (deviceToken.length > 0) {
+              messaging(deviceToken, name, content)
+            }
             io.emit(recipient.toString(), { sender, message: content })
             return response(res, 'Send message successfully', { data: send }, 201)
           } else {

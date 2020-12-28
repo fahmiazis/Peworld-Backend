@@ -23,11 +23,15 @@ const rolesRoutes = require('./routes/roles')
 const authRoutes = require('./routes/auth')
 const jobSeekerRoutes = require('./routes/jobSeeker')
 const companyRoutes = require('./routes/company')
+const resetRoutes = require('./routes/resetPassword')
+const deviceRoute = require('./routes/device')
 
 app.use('/role', rolesRoutes)
 app.use('/auth', authRoutes)
 app.use('/job-seeker', authSeeker, jobSeekerRoutes)
 app.use('/company', authCompany, companyRoutes)
+app.use('/reset', resetRoutes)
+app.use('/device', deviceRoute)
 
 app.get('*', (req, res) => {
   response(res, 'Error route not found', {}, 404, false)
